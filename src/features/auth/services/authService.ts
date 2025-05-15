@@ -11,6 +11,7 @@ export async function login(credentials: { email: string; password: string }) {
       throw new Error('Credenciales inválidas');
     }
   
-    return response.json();
+    const { token } = await response.json();
+    localStorage.setItem('auth_token', token);
   }
   
