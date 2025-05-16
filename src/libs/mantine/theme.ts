@@ -56,11 +56,6 @@ export const theme: MantineThemeOverride = createTheme({
         p: 'md',
         radius: 'md',
       },
-      styles: {
-        root: {
-          backgroundColor: '#fff',
-        },
-      },
     },
     Container: {
       defaultProps: {
