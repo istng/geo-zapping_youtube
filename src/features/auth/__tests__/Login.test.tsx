@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Login } from '../components/Login';
 import { server } from '../../../mocks/server';
-import { beforeAll, afterEach, afterAll, it, expect, describe, vi } from 'vitest';
+import { beforeAll, beforeEach, afterEach, afterAll, it, expect, describe, vi } from 'vitest';
 import { mockLocalStorage } from '../../../mocks/storage/localStorage';
 import { MantineProvider } from '../../../libs/mantine/MantineProvider';
 
@@ -22,12 +22,17 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+const mockNavigate = vi.fn();
+
 // Mock router navigation
-vi.mock('@tanstack/react-router', async () => {
-  const actual = await vi.importActual('@tanstack/react-router');
+vi.mock("@tanstack/react-router", async () => {
+  const actual = await vi.importActual("@tanstack/react-router");
   return {
     ...actual,
-    useNavigate: () => vi.fn()
+    useNavigate: () => mockNavigate,
+    useLocation: vi.fn().mockReturnValue({
+      pathname: "/",
+    }),
   };
 });
 
@@ -63,6 +68,10 @@ const userLogin = async (email: string, password: string) => {
 }
 
 describe('Login', () => {
+  beforeEach(() => {
+    mockNavigate.mockClear();
+  });
+
   it('shows error message when invalid credentials are provided', async () => {
     renderLogin();
 
@@ -80,6 +89,7 @@ describe('Login', () => {
 
     await waitFor(() => {
       expect(localStorage.setItem).toHaveBeenCalledWith('auth_token', 'expected_token');
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/' });
     });
   });
 });

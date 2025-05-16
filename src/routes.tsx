@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
 import { Login } from './features/auth/components/Login';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
-import { Center } from '@mantine/core';
+//import { Center } from '@mantine/core';
 
 // Root route without component
 const rootRoute = createRootRoute();
@@ -10,9 +10,7 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: () => (
-    <Center h="100vh">
       <Login />
-    </Center>
   ),
 });
 

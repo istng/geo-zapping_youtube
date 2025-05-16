@@ -11,7 +11,8 @@ import {
   Group,
   Anchor,
   Text,
-  Alert
+  Alert,
+  Center
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useLoginMutation } from '../hooks/useLoginMutation';
@@ -50,6 +51,7 @@ export function Login() {
   };
 
   return (
+    <Center h="100vh">
     <Container size={420} p="md">
       <Title ta="center" fw={900}>
         Welcome back!
@@ -104,5 +106,6 @@ export function Login() {
         </form>
       </Paper>
     </Container>
+    </Center>
   );
 }
