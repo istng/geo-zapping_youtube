@@ -50,7 +50,8 @@ describe('Login', () => {
     await userLogin('usuario@ejemplo.com', 'contraseña_correcta');
 
     await waitFor(() => {
-      expect(localStorage.setItem).toHaveBeenCalledWith('auth_token', 'expected_token')
+      expect(localStorage.setItem).toHaveBeenCalledWith('auth_token', 'expected_token');
+      expect(window.location.pathname).toBe('/');
     });
   });
 });
