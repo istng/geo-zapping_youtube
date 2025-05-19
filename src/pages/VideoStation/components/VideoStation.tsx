@@ -1,40 +1,55 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { getVideos } from '../hooks/getVideos';
 
 export function VideoStation() {
   const [videos, setVideos] = useState<string[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    getVideos({ location: { lat: 0, lon: 0 }, search_query: 'test' }).then((videos) => {
-      setVideos(videos.videos);
-      setCurrentIndex(0); // reset index when new videos load
+    getVideos({ location: { lat: 0, lon: 0 }, search_query: 'test' }).then((res) => {
+      setVideos(res.videos);
     });
   }, []);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (videos.length ? (prev + 1) % videos.length : 0));
+  const scrollToIndex = (index: number) => {
+    if (!containerRef.current) return;
+
+    const child = containerRef.current.children[index] as HTMLElement;
+    if (child) {
+      child.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (videos.length ? (prev - 1 + videos.length) % videos.length : 0));
+  const handleUp = () => {
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      setCurrentIndex(newIndex);
+      scrollToIndex(newIndex);
+    }
+  };
+
+  const handleDown = () => {
+    if (currentIndex < videos.length - 1) {
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
+      scrollToIndex(newIndex);
+    }
   };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'ArrowDown') {
-        handleNext();
+        handleDown();
       } else if (event.key === 'ArrowUp') {
-        handlePrev();
+        handleUp();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNext, handlePrev]);
-
-  const currentVideoId = videos[currentIndex];
+  }, [handleDown, handleUp]);
 
   return (
     <AppShell
@@ -47,17 +62,36 @@ export function VideoStation() {
     >
       <AppShell.Navbar p="md">
         <Stack justify="center" align="center" style={{ height: '100%' }}>
-          <ActionIcon size="lg" variant="light" onClick={handlePrev}>
+          <ActionIcon size="lg" variant="light" onClick={handleUp}>
             Arriba
           </ActionIcon>
-          <ActionIcon size="lg" variant="light" onClick={handleNext}>
+          <ActionIcon size="lg" variant="light" onClick={handleDown}>
             Abajo
           </ActionIcon>
         </Stack>
       </AppShell.Navbar>
 
       <AppShellMain style={{ height: '100vh', overflow: 'hidden' }}>
-        {currentVideoId && <YouTubeEmbed videoId={currentVideoId} />}
+        <div
+          ref={containerRef}
+          style={{
+            height: '100vh',
+            overflowY: 'scroll',
+            scrollSnapType: 'y mandatory',
+          }}
+        >
+          {videos.map((videoId) => (
+            <div
+              key={videoId}
+              style={{
+                height: '100vh',
+                scrollSnapAlign: 'start',
+              }}
+            >
+              <YouTubeEmbed videoId={videoId} />
+            </div>
+          ))}
+        </div>
       </AppShellMain>
     </AppShell>
   );
