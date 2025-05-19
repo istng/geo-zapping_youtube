@@ -22,6 +22,18 @@ export function VideoStation() {
     setCurrentIndex((prev) => (videos.length ? (prev - 1 + videos.length) % videos.length : 0));
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowDown') {
+        handleNext();
+      } else if (event.key === 'ArrowUp') {
+        handlePrev();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev]);
+
   const currentVideoId = videos[currentIndex];
 
   return (
