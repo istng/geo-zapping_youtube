@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { getVideos } from '../hooks/getVideos';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 export function VideoStation() {
   const [videos, setVideos] = useState<string[]>([]);
@@ -14,13 +15,24 @@ export function VideoStation() {
     });
   }, []);
 
-  const scrollToIndex = (index: number) => {
-    if (!containerRef.current) return;
+  // Virtualizer setup
+  const parentRef = containerRef;
+  const rowVirtualizer = useVirtualizer({
+    count: videos.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => window.innerHeight, // Each video is 100vh
+    overscan: parseInt(import.meta.env.VSTATION_VISIBLE_VIDEOS || import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
+  });
 
-    const child = containerRef.current.children[index] as HTMLElement;
-    if (child) {
-      child.scrollIntoView({ behavior: 'smooth' });
+  // Fix: scroll to the currentIndex when it changes
+  useEffect(() => {
+    if (videos.length > 0) {
+      rowVirtualizer.scrollToIndex(currentIndex, { align: 'center' });
     }
+  }, [currentIndex, videos.length]);
+
+  const scrollToIndex = (index: number) => {
+    rowVirtualizer.scrollToIndex(index, { align: 'center' });
   };
 
   const handleUp = () => {
@@ -73,24 +85,42 @@ export function VideoStation() {
 
       <AppShellMain style={{ height: '100vh', overflow: 'hidden' }}>
         <div
-          ref={containerRef}
+          ref={parentRef}
           style={{
             height: '100vh',
             overflowY: 'scroll',
             scrollSnapType: 'y mandatory',
+            position: 'relative',
           }}
         >
-          {videos.map((videoId) => (
-            <div
-              key={videoId}
-              style={{
-                height: '100vh',
-                scrollSnapAlign: 'start',
-              }}
-            >
-              <YouTubeEmbed videoId={videoId} />
-            </div>
-          ))}
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map(virtualRow => {
+              const videoId = videos[virtualRow.index];
+              return (
+                <div
+                  key={videoId}
+                  ref={el => rowVirtualizer.measureElement?.(el)}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                    scrollSnapAlign: 'start',
+                  }}
+                >
+                  <YouTubeEmbed videoId={videoId} />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </AppShellMain>
     </AppShell>
