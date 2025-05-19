@@ -1,6 +1,6 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
-import { Login } from './features/auth/components/Login';
-import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
+import { Login } from './pages/Login/components/Login';
+import { ProtectedRoute } from './providers/ProtectedRoute';
 //import { Center } from '@mantine/core';
 
 // Root route without component
