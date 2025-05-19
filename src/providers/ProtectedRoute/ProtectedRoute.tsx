@@ -1,4 +1,4 @@
-import { useAuthQuery } from '../hooks/useAuthQuery';
+import { useAuthQuery } from '../../hooks/useAuthQuery';
 import { Navigate } from '@tanstack/react-router';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

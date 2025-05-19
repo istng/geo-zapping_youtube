@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
 import { Login } from './pages/Login/components/Login';
-import { ProtectedRoute } from './providers/ProtectedRoute';
+import { ProtectedRoute } from './providers/ProtectedRoute/ProtectedRoute';
+import { VideoStation } from './pages/VideoStation/components/VideoStation';
 //import { Center } from '@mantine/core';
 
 // Root route without component
@@ -19,7 +20,7 @@ const homeRoute = createRoute({
   path: '/',
   component: () => (
     <ProtectedRoute>
-      <div>Protected Home Content</div>
+      <VideoStation />
     </ProtectedRoute>
   ),
 });
