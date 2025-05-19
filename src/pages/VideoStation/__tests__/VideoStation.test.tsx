@@ -3,9 +3,9 @@ import { expect, describe, it, vi, beforeEach } from 'vitest';
 import { VideoStation } from '../components/VideoStation';
 import { MantineProvider } from '../../../libs/mantine/MantineProvider';
 
-// Mock the getVideos hook
+//use vi.mock to mock the getVideos hook
 vi.mock('../hooks/getVideos', () => ({
-  getVideos: vi.fn().mockResolvedValue({ videos: ['abc123'] }),
+  getVideos: vi.fn().mockResolvedValue({ videos: ['PHzrDLguIy0', '3yWi8HkGnCg'] }),
 }));
 
 const renderVideoStation = () => {

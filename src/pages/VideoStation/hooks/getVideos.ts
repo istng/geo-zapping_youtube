@@ -1,4 +1,4 @@
-export async function getVideos(parameters: { location: {lat: number; lon: number}; search_query: string }): Promise<{ videos: string[] }> {
+export async function getVideos(parameters: { location: {lat: number; lon: number}; search_query: string }) {
 
   if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true') {
     const { devGetVideos } = await import('./devGetVideos');
