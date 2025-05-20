@@ -25,5 +25,4 @@ describe('VideoStation', async () => {
     expect(screen.getByText('Arriba')).toBeInTheDocument();
     expect(screen.getByText('Abajo')).toBeInTheDocument();
   })
-
 });

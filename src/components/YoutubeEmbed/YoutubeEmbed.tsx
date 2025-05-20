@@ -1,11 +1,42 @@
 // components/YoutubeVideo/YoutubeVideo.tsx
+import { useEffect, useRef } from 'react';
 import { AspectRatio } from '@mantine/core';
+import { useVideoStationContext } from '../../pages/VideoStation/context/VideoStationContext';
 
-export function YouTubeEmbed({ videoId }: { videoId: string }) {
+export function YouTubeEmbed({ videoId, index }: { videoId: string; index: number }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { currentIndex } = useVideoStationContext();
+  const isCurrent = index === currentIndex;
+
+  // Play/pause methods
+  const play = () => {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+      '*'
+    );
+  };
+  const pause = () => {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }),
+      '*'
+    );
+  };
+  
+  // Effect: play if current, pause if not
+  useEffect(() => {
+    if (isCurrent) {
+      play();
+    } else {
+      pause();
+    }
+    // Only run when currentIndex or index changes
+  }, [isCurrent]);
+
   return (
     <AspectRatio ratio={16 / 9} style={{ width: '100%', height: '100%' }}>
       <iframe
-        src={`https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&showinfo=0&controls=0`}
+        ref={iframeRef}
+        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&showinfo=0&controls=0`}
         title="YouTube video player"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen

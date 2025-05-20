@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { getVideos } from '../hooks/getVideos';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { VideoStationContext } from '../context/VideoStationContext';
 
 export function VideoStation() {
   const [videos, setVideos] = useState<string[]>([]);
@@ -31,25 +32,26 @@ export function VideoStation() {
     }
   }, [currentIndex, videos.length]);
 
-  const scrollToIndex = (index: number) => {
-    rowVirtualizer.scrollToIndex(index, { align: 'center' });
-  };
 
-  const handleUp = () => {
+  const scrollToIndex = useCallback((index: number) => {
+    rowVirtualizer.scrollToIndex(index, { align: 'center' });
+  }, [rowVirtualizer]);
+
+  const handleUp = useCallback(() => {
     if (currentIndex > 0) {
       const newIndex = currentIndex - 1;
       setCurrentIndex(newIndex);
       scrollToIndex(newIndex);
     }
-  };
+  }, [currentIndex, scrollToIndex]);
 
-  const handleDown = () => {
+  const handleDown = useCallback(() => {
     if (currentIndex < videos.length - 1) {
       const newIndex = currentIndex + 1;
       setCurrentIndex(newIndex);
       scrollToIndex(newIndex);
     }
-  };
+  }, [currentIndex, scrollToIndex, videos.length]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -64,65 +66,67 @@ export function VideoStation() {
   }, [handleDown, handleUp]);
 
   return (
-    <AppShell
-      padding={0}
-      navbar={{
-        width: 80,
-        breakpoint: 'sm',
-        collapsed: { mobile: false },
-      }}
-    >
-      <AppShell.Navbar p="md">
-        <Stack justify="center" align="center" style={{ height: '100%' }}>
-          <ActionIcon size="lg" variant="light" onClick={handleUp}>
-            Arriba
-          </ActionIcon>
-          <ActionIcon size="lg" variant="light" onClick={handleDown}>
-            Abajo
-          </ActionIcon>
-        </Stack>
-      </AppShell.Navbar>
+    <VideoStationContext.Provider value={{ currentIndex }}>
+      <AppShell
+        padding={0}
+        navbar={{
+          width: 80,
+          breakpoint: 'sm',
+          collapsed: { mobile: false },
+        }}
+      >
+        <AppShell.Navbar p="md">
+          <Stack justify="center" align="center" style={{ height: '100%' }}>
+            <ActionIcon size="lg" variant="light" onClick={handleUp}>
+              Arriba
+            </ActionIcon>
+            <ActionIcon size="lg" variant="light" onClick={handleDown}>
+              Abajo
+            </ActionIcon>
+          </Stack>
+        </AppShell.Navbar>
 
-      <AppShellMain style={{ height: '100vh', overflow: 'hidden' }}>
-        <div
-          ref={parentRef}
-          style={{
-            height: '100vh',
-            overflowY: 'scroll',
-            scrollSnapType: 'y mandatory',
-            position: 'relative',
-          }}
-        >
+        <AppShellMain style={{ height: '100vh', overflow: 'hidden' }}>
           <div
+            ref={parentRef}
             style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              width: '100%',
+              height: '100vh',
+              overflowY: 'scroll',
+              scrollSnapType: 'y mandatory',
               position: 'relative',
             }}
           >
-            {rowVirtualizer.getVirtualItems().map(virtualRow => {
-              const videoId = videos[virtualRow.index];
-              return (
-                <div
-                  key={videoId}
-                  ref={el => rowVirtualizer.measureElement?.(el)}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                    scrollSnapAlign: 'start',
-                  }}
-                >
-                  <YouTubeEmbed videoId={videoId} />
-                </div>
-              );
-            })}
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map(virtualRow => {
+                const videoId = videos[virtualRow.index];
+                return (
+                  <div
+                    key={videoId}
+                    ref={el => rowVirtualizer.measureElement?.(el)}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                      scrollSnapAlign: 'start',
+                    }}
+                  >
+                    <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </AppShellMain>
-    </AppShell>
+        </AppShellMain>
+      </AppShell>
+    </VideoStationContext.Provider>
   );
 }
