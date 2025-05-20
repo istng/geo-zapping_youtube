@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { expect, describe, it, vi, beforeEach } from 'vitest';
+import { expect, describe, it, vi, beforeEach, beforeAll } from 'vitest';
 import { VideoStation } from '../components/VideoStation';
 import { MantineProvider } from '../../../libs/mantine/MantineProvider';
 
@@ -17,6 +17,20 @@ const renderVideoStation = () => {
 }
 
 describe('VideoStation', async () => {
+  beforeAll(() => {
+    // Mock geolocation for tests
+    Object.defineProperty(window.navigator, 'geolocation', {
+      value: {
+        getCurrentPosition: (success: (pos: { coords: { latitude: number; longitude: number } }) => void) => {
+          success({ coords: { latitude: 0, longitude: 0 } });
+        },
+        watchPosition: () => 0,
+        clearWatch: () => {},
+      },
+      configurable: true,
+    });
+  });
+
   beforeEach(() => {
     renderVideoStation();
   });

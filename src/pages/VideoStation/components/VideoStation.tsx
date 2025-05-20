@@ -9,6 +9,28 @@ export function VideoStation() {
   const [videos, setVideos] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+
+  useEffect(() => {
+    if (!location) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        },
+        () => {
+          setLocation({ lat: -34.6089399, lon: -58.3896266 });
+        }
+      );
+    }
+  }, [location]);
+
+  useEffect(() => {
+    if (location) {
+      getVideos({ location, search_query: 'test' }).then((res) => {
+        setVideos(res.videos);
+      });
+    }
+  }, [location]);
 
   useEffect(() => {
     getVideos({ location: { lat: 0, lon: 0 }, search_query: 'test' }).then((res) => {
@@ -22,7 +44,7 @@ export function VideoStation() {
     count: videos.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => window.innerHeight, // Each video is 100vh
-    overscan: parseInt(import.meta.env.VSTATION_VISIBLE_VIDEOS || import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
+    overscan: parseInt(import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
   });
 
   // Fix: scroll to the currentIndex when it changes
