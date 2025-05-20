@@ -28,15 +28,10 @@ export function VideoStation() {
     if (location) {
       getVideos({ location, search_query: 'test' }).then((res) => {
         setVideos(res.videos);
+        console.log('Videos:', res.videos);
       });
     }
   }, [location]);
-
-  useEffect(() => {
-    getVideos({ location: { lat: 0, lon: 0 }, search_query: 'test' }).then((res) => {
-      setVideos(res.videos);
-    });
-  }, []);
 
   // Virtualizer setup
   const parentRef = containerRef;
@@ -100,10 +95,10 @@ export function VideoStation() {
         <AppShell.Navbar p="md">
           <Stack justify="center" align="center" style={{ height: '100%' }}>
             <ActionIcon size="lg" variant="light" onClick={handleUp}>
-              Arriba
+              <span role="img" aria-label="Up Arrow">⬆️</span>
             </ActionIcon>
             <ActionIcon size="lg" variant="light" onClick={handleDown}>
-              Abajo
+              <span role="img" aria-label="Down Arrow">⬇️</span>
             </ActionIcon>
           </Stack>
         </AppShell.Navbar>

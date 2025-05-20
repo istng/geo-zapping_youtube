@@ -36,7 +36,7 @@ describe('VideoStation', async () => {
   });
 
   it("renders ActionIcons and YouTubeEmbed", async () => {
-    expect(screen.getByText('Arriba')).toBeInTheDocument();
-    expect(screen.getByText('Abajo')).toBeInTheDocument();
+    expect(screen.getByText('⬆️')).toBeInTheDocument();
+    expect(screen.getByText('⬇️')).toBeInTheDocument();
   })
 });
