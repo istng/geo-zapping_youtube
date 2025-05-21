@@ -1,54 +1,26 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack, Modal } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
-import { getVideos } from '../hooks/getVideos';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { VideoStationContext } from '../context/VideoStationContext';
 import { MapLocation } from '../../../components/MapLocation/MapLocation';
 import { SearchParamsForm } from '../../../components/SearchParamsForm/SearchParamsForm';
+import { useVideoSearch } from '../hooks/useVideoSearch';
+import { useVideoNavigation } from '../hooks/useVideoNavigation';
+import { useLocationModal } from '../hooks/useLocationModal';
 
 export function VideoStation() {
-  const [videos, setVideos] = useState<string[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
-  const [modalOpened, setModalOpened] = useState(false);
-  // Add search params state
-  const [searchParams, setSearchParams] = useState({
-    maxResults: 20,
-    locationRadius: 3000,
-    order: 'date',
-  });
-
-  useEffect(() => {
-    if (!location) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-        },
-        () => {
-          setLocation({ lat: -34.6089399, lon: -58.3896266 });
-        }
-      );
-    }
-  }, [location]);
-
-  useEffect(() => {
-    if (location) {
-      getVideos({
-        location,
-        search_query: 'test',
-        maxResults: searchParams.maxResults,
-        locationRadius: searchParams.locationRadius,
-        order: searchParams.order,
-      } as any).then((res) => {
-        setVideos(res.videos);
-        console.log('Videos:', res.videos);
-      });
-    }
-  }, [location, searchParams]);
+  // Video search, location, and params
+  const {
+    videos,
+    location,
+    setLocation,
+    searchParams,
+    setSearchParams,
+  } = useVideoSearch();
 
   // Virtualizer setup
+  const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = containerRef;
   const rowVirtualizer = useVirtualizer({
     count: videos.length,
@@ -57,51 +29,26 @@ export function VideoStation() {
     overscan: parseInt(import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
   });
 
+  // Video navigation (currentIndex, up/down, scroll)
+  const {
+    currentIndex,
+    handleUp,
+    handleDown,
+  } = useVideoNavigation(videos.length, rowVirtualizer);
+
+  // Modal and location selection
+  const {
+    modalOpened,
+    setModalOpened,
+    handleSelectCoordinates,
+  } = useLocationModal(setLocation);
+
   // Fix: scroll to the currentIndex when it changes
   useEffect(() => {
     if (videos.length > 0) {
       rowVirtualizer.scrollToIndex(currentIndex, { align: 'center' });
     }
   }, [currentIndex, videos.length]);
-
-
-  const scrollToIndex = useCallback((index: number) => {
-    rowVirtualizer.scrollToIndex(index, { align: 'center' });
-  }, [rowVirtualizer]);
-
-  const handleUp = useCallback(() => {
-    if (currentIndex > 0) {
-      const newIndex = currentIndex - 1;
-      setCurrentIndex(newIndex);
-      scrollToIndex(newIndex);
-    }
-  }, [currentIndex, scrollToIndex]);
-
-  const handleDown = useCallback(() => {
-    if (currentIndex < videos.length - 1) {
-      const newIndex = currentIndex + 1;
-      setCurrentIndex(newIndex);
-      scrollToIndex(newIndex);
-    }
-  }, [currentIndex, scrollToIndex, videos.length]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowDown') {
-        handleDown();
-      } else if (event.key === 'ArrowUp') {
-        handleUp();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleDown, handleUp]);
-
-  // Handler to update location from MapLocation
-  const handleSelectCoordinates = useCallback((coords: { lat: number; lon: number }) => {
-    setLocation(coords);
-    setModalOpened(false); // Optionally close modal after selection
-  }, []);
 
   return (
     <VideoStationContext.Provider value={{ currentIndex }}>
