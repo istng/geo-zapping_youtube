@@ -158,7 +158,7 @@ export function VideoStation() {
       <Modal
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
-        title="My Modal Title"
+        title="Search for a location, or select one on the map"
         centered
       >
         {/* Modal content goes here */}
