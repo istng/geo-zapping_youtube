@@ -122,7 +122,7 @@ export function VideoStation() {
               <span role="img" aria-label="Down Arrow">⬇️</span>
             </ActionIcon>
             <ActionIcon size="lg" variant="light" onClick={() => setModalOpened(true)}>
-              <span role="img" aria-label="Info">ℹ️</span>
+                <span role="img" aria-label="Search">🔍</span>
             </ActionIcon>
           </Stack>
         </AppShell.Navbar>
