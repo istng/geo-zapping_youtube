@@ -131,26 +131,41 @@ export function VideoStation() {
                 position: 'relative',
               }}
             >
-              {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                const videoId = videos[virtualRow.index];
-                return (
-                  <div
-                    key={videoId}
-                    ref={el => rowVirtualizer.measureElement?.(el)}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                      scrollSnapAlign: 'start',
-                    }}
-                  >
-                    <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
-                  </div>
-                );
-              })}
+              {videos.length === 0 ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100vh',
+                  fontSize: 22,
+                  color: '#888',
+                  textAlign: 'center',
+                  padding: 32,
+                }}>
+                  No recent videos were found. Try a different location!
+                </div>
+              ) : (
+                rowVirtualizer.getVirtualItems().map(virtualRow => {
+                  const videoId = videos[virtualRow.index];
+                  return (
+                    <div
+                      key={videoId}
+                      ref={el => rowVirtualizer.measureElement?.(el)}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualRow.size}px`,
+                        transform: `translateY(${virtualRow.start}px)`,
+                        scrollSnapAlign: 'start',
+                      }}
+                    >
+                      <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </AppShellMain>
@@ -161,7 +176,6 @@ export function VideoStation() {
         title="Search for a location, or select one on the map"
         centered
       >
-        {/* Modal content goes here */}
         <div>
           <MapLocation lat={location?.lat} lon={location?.lon} zoom={13} onSelectCoordinates={handleSelectCoordinates} />
         </div>
