@@ -1,4 +1,4 @@
-export async function getVideos(parameters: { location: {lat: number; lon: number}; search_query: string }) {
+export async function getVideos(parameters: { location: {lat: number; lon: number}; search_query: string; maxResults?: number; locationRadius?: number; order?: string }) {
   const response = await fetch(import.meta.env.VITE_MATTW_YT_API, {
     method: 'POST',
     headers: {
@@ -8,6 +8,9 @@ export async function getVideos(parameters: { location: {lat: number; lon: numbe
       lat: parameters.location.lat,
       lon: parameters.location.lon,
       search_query: parameters.search_query,
+      maxResults: parameters.maxResults ?? 20,
+      locationRadius: parameters.locationRadius ?? 3000,
+      order: parameters.order ?? 'date',
     }),
   });
 
