@@ -17,6 +17,7 @@ export function VideoStation() {
     setLocation,
     searchParams,
     setSearchParams,
+    loading,
   } = useVideoSearch();
 
   // Virtualizer setup
@@ -75,37 +76,54 @@ export function VideoStation() {
         </AppShell.Navbar>
 
         <AppShellMain style={{ height: '100vh', overflow: 'hidden' }}>
-          <div
-            ref={parentRef}
-            style={{
+          {loading ? (
+            <div style={{
               height: '100vh',
-              overflowY: 'scroll',
-              scrollSnapType: 'y mandatory',
-              position: 'relative',
-            }}
-          >
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 28,
+              color: '#888',
+              background: 'rgba(255,255,255,0.8)',
+              zIndex: 10,
+              position: 'absolute',
+              width: '100%',
+              left: 0,
+              top: 0,
+            }}>
+              Loading videos...
+            </div>
+          ) : videos.length === 0 ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100vh',
+              fontSize: 22,
+              color: '#888',
+              textAlign: 'center',
+              padding: 32,
+            }}>
+              No recent videos were found. Try a different location!
+            </div>
+          ) : (
             <div
+              ref={parentRef}
               style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: '100%',
+                height: '100vh',
+                overflowY: 'scroll',
+                scrollSnapType: 'y mandatory',
                 position: 'relative',
               }}
             >
-              {videos.length === 0 ? (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100vh',
-                  fontSize: 22,
-                  color: '#888',
-                  textAlign: 'center',
-                  padding: 32,
-                }}>
-                  No recent videos were found. Try a different location!
-                </div>
-              ) : (
-                rowVirtualizer.getVirtualItems().map(virtualRow => {
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {rowVirtualizer.getVirtualItems().map(virtualRow => {
                   const videoId = videos[virtualRow.index];
                   return (
                     <div
@@ -124,10 +142,10 @@ export function VideoStation() {
                       <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
                     </div>
                   );
-                })
-              )}
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </AppShellMain>
       </AppShell>
       <Modal

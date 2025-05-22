@@ -9,6 +9,7 @@ export function useVideoSearch() {
     locationRadius: 3000,
     order: 'date',
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!location) {
@@ -25,16 +26,20 @@ export function useVideoSearch() {
 
   useEffect(() => {
     if (location) {
+      setLoading(true);
       getVideos({
         location,
         search_query: 'test',
         maxResults: searchParams.maxResults,
         locationRadius: searchParams.locationRadius,
         order: searchParams.order,
-      } as any).then((res) => {
-        setVideos(res.videos);
-        // Optionally handle loading/error here
-      });
+      } as any)
+        .then((res) => {
+          setVideos(res.videos);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [location, searchParams]);
 
@@ -44,5 +49,6 @@ export function useVideoSearch() {
     setLocation,
     searchParams,
     setSearchParams,
+    loading,
   };
 }
