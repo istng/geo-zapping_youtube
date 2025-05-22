@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack, Modal } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -8,6 +8,7 @@ import { SearchParamsForm } from '../../../components/SearchParamsForm/SearchPar
 import { useVideoSearch } from '../hooks/useVideoSearch';
 import { useVideoNavigation } from '../hooks/useVideoNavigation';
 import { useLocationModal } from '../hooks/useLocationModal';
+import { VideoStatistics } from '../../../components/VideoStatistics/VideoStatistics';
 
 export function VideoStation() {
   // Video search, location, and params
@@ -44,6 +45,9 @@ export function VideoStation() {
     handleSelectCoordinates,
   } = useLocationModal(setLocation);
 
+  const [statsModalOpened, setStatsModalOpened] = useState(false);
+  const [statsIds, setStatsIds] = useState<string[]>([]);
+
   // Fix: scroll to the currentIndex when it changes
   useEffect(() => {
     if (videos.length > 0) {
@@ -71,6 +75,9 @@ export function VideoStation() {
             </ActionIcon>
             <ActionIcon size="lg" variant="light" onClick={() => setModalOpened(true)}>
                 <span role="img" aria-label="Search">🔍</span>
+            </ActionIcon>
+            <ActionIcon size="lg" variant="light" onClick={() => setStatsModalOpened(true)}>
+                <span role="img" aria-label="Statistics">📊</span>
             </ActionIcon>
           </Stack>
         </AppShell.Navbar>
@@ -180,6 +187,32 @@ export function VideoStation() {
               }}
             />
           </div>
+        </div>
+      </Modal>
+      <Modal
+        opened={statsModalOpened}
+        onClose={() => setStatsModalOpened(false)}
+        title="Video Statistics"
+        centered
+        size="lg"
+        styles={{
+          content: { padding: 24 },
+          body: { padding: 0 },
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <button
+            style={{ alignSelf: 'flex-end', marginBottom: 16 }}
+            onClick={() => setStatsIds(videos)}
+            disabled={videos.length === 0}
+          >
+            Show statistics for current videos
+          </button>
+          {statsIds.length > 0 ? (
+            <VideoStatistics ids={statsIds} />
+          ) : (
+            <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show. Click the button above to load stats.</div>
+          )}
         </div>
       </Modal>
     </VideoStationContext.Provider>
