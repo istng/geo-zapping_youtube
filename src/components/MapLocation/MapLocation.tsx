@@ -36,16 +36,30 @@ function MoveMapTo({ center }: { center: [number, number] }) {
   return null;
 }
 
-export function MapLocation({ lat = -34.6089399, lon = -58.3896266, zoom = 13, onSelectCoordinates }: {
+export function MapLocation({ lat = -34.6089399, lon = -58.3896266, zoom = 13, onChange }: {
   lat?: number;
   lon?: number;
   zoom?: number;
-  onSelectCoordinates?: (coords: { lat: number; lon: number }) => void;
+  onChange?: (coords: { lat: number; lon: number }) => void;
 }) {
+  // Use controlled state from parent, fallback to props for initial value
   const [mapCenter, setMapCenter] = useState<[number, number]>([lat, lon]);
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Keep mapCenter in sync with props
+  useEffect(() => {
+    setMapCenter([lat, lon]);
+  }, [lat, lon]);
+
+  // Notify parent on change
+  useEffect(() => {
+    if (onChange) {
+      onChange({ lat: mapCenter[0], lon: mapCenter[1] });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapCenter]);
 
   // Geocode search handler
   const handleSearch = async (e: React.FormEvent) => {
@@ -126,14 +140,7 @@ export function MapLocation({ lat = -34.6089399, lon = -58.3896266, zoom = 13, o
           </Popup>
         </Marker>
       </MapContainer>
-      {onSelectCoordinates && (
-        <button
-          style={{ marginTop: 12, width: '100%', padding: '8px 0', fontWeight: 'bold' }}
-          onClick={() => onSelectCoordinates({ lat: mapCenter[0], lon: mapCenter[1] })}
-        >
-          Select this location
-        </button>
-      )}
+      {/* Removed the Select this location button, now controlled by parent */}
     </div>
   );
 }
