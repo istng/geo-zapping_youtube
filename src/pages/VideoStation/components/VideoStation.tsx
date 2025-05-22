@@ -194,15 +194,15 @@ export function VideoStation() {
         onClose={() => setStatsModalOpened(false)}
         title="Video Statistics"
         centered
-        size="lg"
+        size="auto"
         styles={{
-          content: { padding: 24 },
+          content: { padding: 24, width: "80%" },
           body: { padding: 0 },
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <button
-            style={{ alignSelf: 'flex-end', marginBottom: 16 }}
+            style={{ marginBottom: 16 }}
             onClick={() => setStatsIds(videos)}
             disabled={videos.length === 0}
           >
