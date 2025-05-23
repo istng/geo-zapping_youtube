@@ -46,7 +46,22 @@ export function VideoStation() {
   } = useLocationModal(setLocation);
 
   const [statsModalOpened, setStatsModalOpened] = useState(false);
+  // Track last statsIds to avoid unnecessary fetches
   const [statsIds, setStatsIds] = useState<string[]>([]);
+  const prevVideosRef = useRef<string[]>([]);
+
+  // When stats modal opens, update statsIds if videos changed
+  useEffect(() => {
+    if (statsModalOpened) {
+      const videosChanged =
+        videos.length !== prevVideosRef.current.length ||
+        videos.some((id, i) => id !== prevVideosRef.current[i]);
+      if (videosChanged) {
+        setStatsIds(videos);
+        prevVideosRef.current = videos;
+      }
+    }
+  }, [statsModalOpened, videos]);
 
   // Local state for modal (location and search params)
   const [modalLocation, setModalLocation] = useState<{ lat: number; lon: number } | null>(location);
@@ -231,17 +246,10 @@ export function VideoStation() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <button
-            style={{ marginBottom: 16 }}
-            onClick={() => setStatsIds(videos)}
-            disabled={videos.length === 0}
-          >
-            Show statistics for current videos
-          </button>
           {statsIds.length > 0 ? (
             <VideoStatistics ids={statsIds} />
           ) : (
-            <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show. Click the button above to load stats.</div>
+            <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show.</div>
           )}
         </div>
       </Modal>

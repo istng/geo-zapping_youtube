@@ -61,7 +61,7 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
   };
 
   return (
-    <div style={{ width: '100%', minHeight: 400, height: 500 }}>
+    <div style={{ width: '100%', minHeight: 400, height: 530 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
@@ -88,6 +88,7 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
             dataKey="channel"
             width={180}
             tick={renderCustomYAxisTick}
+            interval={0}
           />
           <Tooltip 
             formatter={(value, name) => {
