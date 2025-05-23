@@ -2,7 +2,6 @@ import { useVideoDetails } from './hooks/useVideoDetails';
 import type { VideoStatistics as VideoStatisticsType } from './hooks/useVideoDetails';
 import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
-import { useRef, useMemo } from 'react';
 
 interface VideoStatisticsProps {
   ids: string[];
@@ -12,38 +11,14 @@ interface VideoStatisticsProps {
 export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
-  // Memoize last fetched ids and data
-  const lastIdsRef = useRef<string[]>([]);
-  const lastDataRef = useRef<any>(null);
-  const lastLoadingRef = useRef(false);
-  const lastErrorRef = useRef<any>(null);
+  const { data, loading, error } = useVideoDetails(ids);
 
-  const idsChanged =
-    ids.length !== lastIdsRef.current.length ||
-    ids.some((id, i) => id !== lastIdsRef.current[i]);
-
-  // Only fetch if ids changed
-  const { data, loading, error } = useVideoDetails(idsChanged ? ids : lastIdsRef.current);
-
-  // Update cache if ids changed and data is available
-  if (idsChanged && data.length) {
-    lastIdsRef.current = ids;
-    lastDataRef.current = data;
-    lastLoadingRef.current = loading;
-    lastErrorRef.current = error;
-  }
-
-  // Use cached data if ids did not change
-  const chartData = useMemo(() => (idsChanged ? data : lastDataRef.current) || [], [idsChanged, data]);
-  const isLoading = idsChanged ? loading : false;
-  const isError = idsChanged ? error : lastErrorRef.current;
-
-  if (isLoading) return <div>Loading video statistics...</div>;
-  if (isError) return <div>Error: {isError}</div>;
-  if (!chartData.length) return <div>No statistics found.</div>;
+  if (loading) return <div>Loading video statistics...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!data.length) return <div>No statistics found.</div>;
 
   // Prepare chart data
-  const preparedChartData = chartData.map((video: VideoStatisticsType) => ({
+  const chartData = data.map((video: VideoStatisticsType) => ({
     name: video.snippet.title,
     channel: video.snippet.channelTitle,
     viewCount: Number(video.statistics.viewCount ?? 0),
@@ -56,7 +31,7 @@ export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
 
   const renderBarLabel = (props: any) => {
     const { x, y, height, index } = props;
-    const title = preparedChartData[index]?.name;
+    const title = chartData[index]?.name;
     return (
       <text
         x={x + 8} // 8px right of the bar start
@@ -76,7 +51,7 @@ export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
     return (
       <g transform={`translate(${x},${y})`}>
         <text x={0} y={0} dy={4} textAnchor="end" fontSize={13} fill={labelColor}>
-          {preparedChartData[payload.index]?.channel ?? ''}
+          {chartData[payload.index]?.channel ?? ''}
         </text>
       </g>
     );
@@ -116,7 +91,7 @@ export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
     <div style={{ width: '100%', minHeight: 400, height: 530 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={preparedChartData}
+          data={chartData}
           layout="vertical"
           margin={{ top: 16, right: 64, left: 32, bottom: 32 }}
           barCategoryGap={16}
