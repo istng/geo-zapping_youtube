@@ -128,7 +128,6 @@ export function VideoStation() {
               justifyContent: 'center',
               fontSize: 28,
               color: '#888',
-              background: 'rgba(255,255,255,0.8)',
               zIndex: 10,
               position: 'absolute',
               width: '100%',
@@ -237,6 +236,7 @@ export function VideoStation() {
         </div>
       </Modal>
       <Modal
+        keepMounted={true}
         opened={statsModalOpened}
         onClose={() => setStatsModalOpened(false)}
         title="Video Statistics"
