@@ -113,7 +113,7 @@ export function VideoStation() {
             <ActionIcon size="lg" variant="light" onClick={() => setModalOpened(true)}>
                 <span role="img" aria-label="Search">🔍</span>
             </ActionIcon>
-            <ActionIcon size="lg" variant="light" onClick={() => setStatsModalOpened(true)}>
+            <ActionIcon size="lg" variant="light" onClick={() => setStatsModalOpened(true)} disabled={loading} style={loading ? { color: '#bbb', cursor: 'not-allowed' } : {}}>
                 <span role="img" aria-label="Statistics">📊</span>
             </ActionIcon>
           </Stack>
