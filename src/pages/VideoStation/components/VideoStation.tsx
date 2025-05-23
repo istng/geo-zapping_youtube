@@ -36,6 +36,8 @@ export function VideoStation() {
     currentIndex,
     handleUp,
     handleDown,
+    setCurrentIndex,
+    scrollToIndex,
   } = useVideoNavigation(videos.length, rowVirtualizer);
 
   // Modal and location selection
@@ -247,7 +249,14 @@ export function VideoStation() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {statsIds.length > 0 ? (
-            <VideoStatistics ids={statsIds} />
+            <VideoStatistics 
+              ids={statsIds} 
+              onBarClick={index => {
+                setCurrentIndex(index);
+                scrollToIndex(index);
+                setStatsModalOpened(false);
+              }}
+            />
           ) : (
             <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show.</div>
           )}
