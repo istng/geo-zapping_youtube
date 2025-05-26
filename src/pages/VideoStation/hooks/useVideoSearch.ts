@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getVideos } from './getVideos';
+import { useVideoApi } from '../../../services/VideoApi/useVideoApi';
 
 export function useVideoSearch() {
   const [videos, setVideos] = useState<string[]>([]);
@@ -10,6 +10,9 @@ export function useVideoSearch() {
     order: 'date',
   });
   const [loading, setLoading] = useState(true);
+
+  // Use the memoized API service from the hook
+  const { getVideos } = useVideoApi();
 
   useEffect(() => {
     if (!location) {
@@ -33,7 +36,7 @@ export function useVideoSearch() {
         maxResults: searchParams.maxResults,
         locationRadius: searchParams.locationRadius,
         order: searchParams.order,
-      } as any)
+      })
         .then((res) => {
           setVideos(res.videos);
         })
