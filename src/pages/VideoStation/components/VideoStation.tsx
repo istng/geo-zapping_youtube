@@ -1,6 +1,7 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack, Modal } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
+import type { YouTubeEmbedHandle } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { VideoStationContext } from '../context/VideoStationContext';
 import { MapLocation } from '../../../components/MapLocation/MapLocation';
@@ -12,6 +13,7 @@ import { VideoStatistics } from '../../../components/VideoStatistics/VideoStatis
 import { useModalLocationAndParams } from '../hooks/useModalLocationAndParams';
 import { useVideoStats } from '../hooks/useVideoStats';
 import styles from './VideoStation.module.css';
+import { VideoOverlay } from '../../../components/VideoOverlay/VideoOverlay';
 
 export function VideoStation() {
   // Video search, location, and params
@@ -66,6 +68,19 @@ export function VideoStation() {
     statsIds,
   } = useVideoStats(videos);
 
+  // Ref for the current YouTubeEmbed
+  const currentVideoRef = useRef<YouTubeEmbedHandle>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleOverlayClick = () => {
+    if (isPlaying) {
+      currentVideoRef.current?.pause?.();
+    } else {
+      currentVideoRef.current?.play?.();
+    }
+    setIsPlaying((prev) => !prev);
+  };
+
   return (
     <VideoStationContext.Provider value={{ currentIndex }}>
       <AppShell
@@ -103,29 +118,39 @@ export function VideoStation() {
               No recent videos were found. Try a different location!
             </div>
           ) : (
-            <div
-              ref={parentRef}
-              className={styles['video-station-scroll']}
-            >
+            <>
+              <VideoOverlay
+                onClick={handleOverlayClick}
+              />
               <div
-                className={styles['video-station-virtualizer']}
-                style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+                ref={parentRef}
+                className={styles['video-station-scroll']}
               >
-                {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                  const videoId = videos[virtualRow.index];
-                  return (
-                    <div
-                      key={videoId}
-                      ref={el => rowVirtualizer.measureElement?.(el)}
-                      className={styles['video-station-virtual-item']}
-                      style={{ height: `${virtualRow.size}px`, transform: `translateY(${virtualRow.start}px)` }}
-                    >
-                      <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
-                    </div>
-                  );
-                })}
+                <div
+                  className={styles['video-station-virtualizer']}
+                  style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+                >
+                  {rowVirtualizer.getVirtualItems().map(virtualRow => {
+                    const videoId = videos[virtualRow.index];
+                    const isCurrent = virtualRow.index === currentIndex;
+                    return (
+                      <div
+                        key={videoId}
+                        ref={el => rowVirtualizer.measureElement?.(el)}
+                        className={styles['video-station-virtual-item']}
+                        style={{ height: `${virtualRow.size}px`, transform: `translateY(${virtualRow.start}px)` }}
+                      >
+                        <YouTubeEmbed
+                          ref={isCurrent ? currentVideoRef : undefined}
+                          videoId={videoId}
+                          index={virtualRow.index}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </AppShellMain>
       </AppShell>
