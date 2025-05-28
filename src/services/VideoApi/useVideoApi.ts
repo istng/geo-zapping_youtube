@@ -8,14 +8,6 @@ export class VideoApiService {
     locationRadius?: number;
     order?: string;
   }) {
-    console.log('Fetching videos with params:',
-      JSON.stringify({
-        lat: params.location.lat,
-        lon: params.location.lon,
-        maxResults: params.maxResults ?? 20,
-        locationRadius: params.locationRadius ?? 3000,
-        order: params.order ?? 'date',
-      }));
     const response = await fetch(import.meta.env.VITE_MATTW_YT_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
