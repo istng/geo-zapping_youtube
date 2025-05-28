@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export function useVideoNavigation(videosLength: number, rowVirtualizer: any) {
+export function useVideoNavigation(videosLength: number, scrollToIndex: any) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const scrollToIndex = useCallback((index: number) => {
-    rowVirtualizer.scrollToIndex(index, { align: 'center' });
-  }, [rowVirtualizer]);
 
   const handleUp = useCallback(() => {
     if (currentIndex > 0) {
@@ -25,9 +21,9 @@ export function useVideoNavigation(videosLength: number, rowVirtualizer: any) {
 
   useEffect(() => {
     if (videosLength > 0) {
-      rowVirtualizer.scrollToIndex(currentIndex, { align: 'center' });
+      scrollToIndex(currentIndex);
     }
-  }, [currentIndex, videosLength, rowVirtualizer]);
+  }, [currentIndex, videosLength]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -45,7 +41,6 @@ export function useVideoNavigation(videosLength: number, rowVirtualizer: any) {
     currentIndex,
     setCurrentIndex,
     handleUp,
-    handleDown,
-    scrollToIndex,
+    handleDown
   };
 }

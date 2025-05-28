@@ -32,7 +32,6 @@ export function useVideoSearch() {
       setLoading(true);
       getVideos({
         location,
-        search_query: 'test',
         maxResults: searchParams.maxResults,
         locationRadius: searchParams.locationRadius,
         order: searchParams.order,
