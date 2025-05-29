@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 
 export function useVideoNavigation(videosLength: number, scrollToIndex: any) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [shouldPlay, setShouldPlay] = useState(false);
 
   const handleUp = useCallback(() => {
     if (currentIndex > 0) {
       const newIndex = currentIndex - 1;
       setCurrentIndex(newIndex);
       scrollToIndex(newIndex);
+      setShouldPlay(true);
     }
   }, [currentIndex, scrollToIndex]);
 
@@ -16,14 +18,9 @@ export function useVideoNavigation(videosLength: number, scrollToIndex: any) {
       const newIndex = currentIndex + 1;
       setCurrentIndex(newIndex);
       scrollToIndex(newIndex);
+      setShouldPlay(true);
     }
   }, [currentIndex, scrollToIndex, videosLength]);
-
-  useEffect(() => {
-    if (videosLength > 0) {
-      scrollToIndex(currentIndex);
-    }
-  }, [currentIndex, videosLength]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -41,6 +38,8 @@ export function useVideoNavigation(videosLength: number, scrollToIndex: any) {
     currentIndex,
     setCurrentIndex,
     handleUp,
-    handleDown
+    handleDown,
+    shouldPlay,
+    setShouldPlay,
   };
 }

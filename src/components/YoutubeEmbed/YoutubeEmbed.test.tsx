@@ -5,14 +5,21 @@ import { MantineProvider } from '../../libs/mantine/MantineProvider';
 import { VideoStationContext } from '../../pages/VideoStation/context/VideoStationContext';
 import { useState } from 'react';
 
-const TestWrapper = ({ initialIndex, videoIndex }: { initialIndex: number; videoIndex: number }) => {
+const TestWrapper = ({
+  initialIndex,
+  videoIndex,
+}: {
+  initialIndex: number;
+  videoIndex: number;
+}) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   (window as any).setTestCurrentIndex = setCurrentIndex;
+  const setIsPlaying = vi.fn();
 
   return (
     <MantineProvider>
       <VideoStationContext.Provider value={{ currentIndex }}>
-        <YouTubeEmbed videoId="PHzrDLguIy0" index={videoIndex} />
+        <YouTubeEmbed videoId="PHzrDLguIy0" index={videoIndex} setIsPlaying={setIsPlaying} />
       </VideoStationContext.Provider>
     </MantineProvider>
   );
@@ -55,7 +62,7 @@ describe('YouTubeEmbed with context', () => {
 
     expect(postMessageMock).toHaveBeenCalledWith(
       JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
-      '*'
+      '*',
     );
   });
 
@@ -74,7 +81,7 @@ describe('YouTubeEmbed with context', () => {
 
     expect(postMessageMock).toHaveBeenCalledWith(
       JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }),
-      '*'
+      '*',
     );
   });
 });
