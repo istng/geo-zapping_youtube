@@ -1,0 +1,28 @@
+.copy-button-disabled {
+  color: #bbb;
+  cursor: not-allowed;
+}
+
+.copied-popup {
+  position: fixed;
+  top: 50%;
+  left: 120px;
+  background: #4a90e2;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(-10px) translateX(-50%);
+  transition: all 0.3s ease-in-out;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.copied-popup.show {
+  opacity: 1;
+  transform: translateY(0) translateX(-50%);
+} 

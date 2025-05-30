@@ -14,6 +14,7 @@ import { useModalLocationAndParams } from '../hooks/useModalLocationAndParams';
 import { useVideoStats } from '../hooks/useVideoStats';
 import styles from './VideoStation.module.css';
 import { VideoOverlay } from '../../../components/VideoOverlay/VideoOverlay';
+import { CopyVideoButton } from '../../../components/CopyVideoButton';
 
 export function VideoStation() {
   // Video search, location, and params
@@ -104,6 +105,10 @@ export function VideoStation() {
                 📊
               </span>
             </ActionIcon>
+            <CopyVideoButton
+              videoId={videos.length > 0 && currentIndex < videos.length ? videos[currentIndex] : null}
+              disabled={loading || videos.length === 0}
+            />
           </Stack>
         </AppShell.Navbar>
 
