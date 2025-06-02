@@ -2,25 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Login } from '../components/Login';
-import { server } from '../../../mocks/server';
-import { beforeAll, beforeEach, afterEach, afterAll, it, expect, describe, vi } from 'vitest';
+import { beforeAll, beforeEach, it, expect, describe, vi } from 'vitest';
 import { mockLocalStorage } from '../../../mocks/storage/localStorage';
 import { MantineProvider } from '../../../libs/mantine/MantineProvider';
-
-// Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
 
 const mockNavigate = vi.fn();
 
@@ -40,10 +24,7 @@ vi.mock("@tanstack/react-router", async () => {
 beforeAll(() => {
   localStorage.clear();
   vi.clearAllMocks();
-  server.listen();
 });
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
 
 Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage
