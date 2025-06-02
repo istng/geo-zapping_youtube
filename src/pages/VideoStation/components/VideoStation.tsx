@@ -5,6 +5,7 @@ import { getVideos } from '../hooks/getVideos';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { VideoStationContext } from '../context/VideoStationContext';
 import { MapLocation } from '../../../components/MapLocation/MapLocation';
+import { SearchParamsForm } from '../../../components/SearchParamsForm/SearchParamsForm';
 
 export function VideoStation() {
   const [videos, setVideos] = useState<string[]>([]);
@@ -12,6 +13,12 @@ export function VideoStation() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
+  // Add search params state
+  const [searchParams, setSearchParams] = useState({
+    maxResults: 20,
+    locationRadius: 3000,
+    order: 'date',
+  });
 
   useEffect(() => {
     if (!location) {
@@ -28,12 +35,18 @@ export function VideoStation() {
 
   useEffect(() => {
     if (location) {
-      getVideos({ location, search_query: 'test' }).then((res) => {
+      getVideos({
+        location,
+        search_query: 'test',
+        maxResults: searchParams.maxResults,
+        locationRadius: searchParams.locationRadius,
+        order: searchParams.order,
+      } as any).then((res) => {
         setVideos(res.videos);
         console.log('Videos:', res.videos);
       });
     }
-  }, [location]);
+  }, [location, searchParams]);
 
   // Virtualizer setup
   const parentRef = containerRef;
@@ -173,11 +186,35 @@ export function VideoStation() {
       <Modal
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
-        title="Search for a location, or select one on the map"
+        title="Select location, customize search results!"
         centered
+        size="auto"
+        styles={{
+          content: { padding: 0 },
+          body: { padding: 0 },
+        }}
       >
-        <div>
-          <MapLocation lat={location?.lat} lon={location?.lon} zoom={13} onSelectCoordinates={handleSelectCoordinates} />
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ flex: 1 }}>
+            <MapLocation lat={location?.lat} lon={location?.lon} zoom={13} onSelectCoordinates={handleSelectCoordinates} />
+          </div>
+          <div style={{ minWidth: 280, maxWidth: 320 }}>
+            <SearchParamsForm
+              initialValues={{
+                radius: searchParams.locationRadius,
+                orderBy: searchParams.order,
+                maxResults: searchParams.maxResults,
+              }}
+              onSubmit={(data) => {
+                setSearchParams({
+                  maxResults: data.maxResults,
+                  locationRadius: data.radius,
+                  order: data.orderBy,
+                });
+                setModalOpened(false);
+              }}
+            />
+          </div>
         </div>
       </Modal>
     </VideoStationContext.Provider>
