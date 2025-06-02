@@ -42,11 +42,31 @@ export function VideoStation() {
   const {
     modalOpened,
     setModalOpened,
-    handleSelectCoordinates,
+    // handleSelectCoordinates, // No longer needed
   } = useLocationModal(setLocation);
 
   const [statsModalOpened, setStatsModalOpened] = useState(false);
   const [statsIds, setStatsIds] = useState<string[]>([]);
+
+  // Local state for modal (location and search params)
+  const [modalLocation, setModalLocation] = useState<{ lat: number; lon: number } | null>(location);
+  const [modalParams, setModalParams] = useState({
+    radius: searchParams.locationRadius,
+    orderBy: searchParams.order,
+    maxResults: searchParams.maxResults,
+  });
+
+  // Keep modal state in sync with main state when modal opens
+  useEffect(() => {
+    if (modalOpened) {
+      setModalLocation(location);
+      setModalParams({
+        radius: searchParams.locationRadius,
+        orderBy: searchParams.order,
+        maxResults: searchParams.maxResults,
+      });
+    }
+  }, [modalOpened, location, searchParams]);
 
   // Fix: scroll to the currentIndex when it changes
   useEffect(() => {
@@ -168,25 +188,35 @@ export function VideoStation() {
       >
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
           <div style={{ flex: 1 }}>
-            <MapLocation lat={location?.lat} lon={location?.lon} zoom={13} onSelectCoordinates={handleSelectCoordinates} />
+            <MapLocation
+              lat={modalLocation?.lat}
+              lon={modalLocation?.lon}
+              zoom={13}
+              onChange={coords => setModalLocation(coords)}
+            />
           </div>
           <div style={{ minWidth: 280, maxWidth: 320 }}>
             <SearchParamsForm
-              initialValues={{
-                radius: searchParams.locationRadius,
-                orderBy: searchParams.order,
-                maxResults: searchParams.maxResults,
-              }}
-              onSubmit={(data) => {
-                setSearchParams({
-                  maxResults: data.maxResults,
-                  locationRadius: data.radius,
-                  order: data.orderBy,
-                });
-                setModalOpened(false);
-              }}
+              values={modalParams}
+              onChange={setModalParams}
             />
           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 16, gap: 8 }}>
+          <button
+            style={{ padding: '8px 24px', fontWeight: 'bold' }}
+            onClick={() => {
+              if (modalLocation) setLocation(modalLocation);
+              setSearchParams({
+                maxResults: modalParams.maxResults,
+                locationRadius: modalParams.radius,
+                order: modalParams.orderBy,
+              });
+              setModalOpened(false);
+            }}
+          >
+            Apply
+          </button>
         </div>
       </Modal>
       <Modal
