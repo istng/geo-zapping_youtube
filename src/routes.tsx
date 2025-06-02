@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
-import { Login } from './pages/Login/components/Login';
+import { Login } from './pages/Login/Login';
 import { ProtectedRoute } from './providers/ProtectedRoute/ProtectedRoute';
-import { VideoStation } from './pages/VideoStation/components/VideoStation';
+import { VideoStation } from './pages/VideoStation/VideoStation';
 //import { Center } from '@mantine/core';
 
 // Root route without component
@@ -10,9 +10,7 @@ const rootRoute = createRootRoute();
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
-  component: () => (
-      <Login />
-  ),
+  component: () => <Login />,
 });
 
 const homeRoute = createRoute({
@@ -33,4 +31,4 @@ declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }
-} 
+}

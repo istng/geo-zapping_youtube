@@ -1,7 +1,7 @@
 // components/YoutubeVideo/YoutubeVideo.tsx
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { AspectRatio } from '@mantine/core';
-import { useVideoStationContext } from '../../pages/VideoStation/context/VideoStationContext';
+import { useVideoStationContext } from '../../context/VideoStationContext';
 
 export type YouTubeEmbedHandle = {
   play: () => void;
