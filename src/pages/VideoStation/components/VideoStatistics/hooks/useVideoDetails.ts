@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useVideoApi } from '../../../services/VideoApi/useVideoApi';
+import { useVideoApi } from '../../../../../services/VideoApi/useVideoApi';
 
 export interface VideoStatistics {
   id: string;

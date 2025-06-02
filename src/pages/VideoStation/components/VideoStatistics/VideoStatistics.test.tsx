@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { expect, describe, it, vi, afterEach } from 'vitest';
-import { MantineProvider } from '../../libs/mantine/MantineProvider';
+import { MantineProvider } from '../../../../libs/mantine/MantineProvider';
 
 // Only mock ResponsiveContainer to avoid jsdom SVG issues
 vi.mock('recharts', async () => {
@@ -12,18 +12,18 @@ vi.mock('recharts', async () => {
 });
 
 const renderVideoStatistics = async (props = {}) => {
-    const { VideoStatistics } = await import('./VideoStatistics');
-    render(
+  const { VideoStatistics } = await import('./VideoStatistics');
+  render(
     <MantineProvider>
-        <VideoStatistics ids={['id1', 'id2']} {...props} />
-    </MantineProvider>
-    );
+      <VideoStatistics ids={['id1', 'id2']} {...props} />
+    </MantineProvider>,
+  );
 };
 
 describe('VideoStatistics', () => {
-    afterEach(() => {
-        vi.resetModules();
-    });
+  afterEach(() => {
+    vi.resetModules();
+  });
 
   it('renders loading state', async () => {
     vi.doMock('./hooks/useVideoDetails', () => ({

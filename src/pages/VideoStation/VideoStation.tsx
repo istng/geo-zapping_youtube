@@ -1,20 +1,20 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack, Modal } from '@mantine/core';
-import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
-import type { YouTubeEmbedHandle } from '../../../components/YoutubeEmbed/YoutubeEmbed';
+import { YouTubeEmbed } from './components/YoutubeEmbed/YoutubeEmbed';
+import type { YouTubeEmbedHandle } from './components/YoutubeEmbed/YoutubeEmbed';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { VideoStationContext } from '../context/VideoStationContext';
-import { MapLocation } from '../../../components/MapLocation/MapLocation';
-import { SearchParamsForm } from '../../../components/SearchParamsForm/SearchParamsForm';
-import { useVideoSearch } from '../hooks/useVideoSearch';
-import { useVideoNavigation } from '../hooks/useVideoNavigation';
-import { useLocationModal } from '../hooks/useLocationModal';
-import { VideoStatistics } from '../../../components/VideoStatistics/VideoStatistics';
-import { useModalLocationAndParams } from '../hooks/useModalLocationAndParams';
-import { useVideoStats } from '../hooks/useVideoStats';
+import { VideoStationContext } from './context/VideoStationContext';
+import { MapLocation } from './components/MapLocation/MapLocation';
+import { SearchParamsForm } from './components/SearchParamsForm/SearchParamsForm';
+import { useVideoSearch } from './hooks/useVideoSearch';
+import { useVideoNavigation } from './hooks/useVideoNavigation';
+import { useLocationModal } from './hooks/useLocationModal';
+import { VideoStatistics } from './components/VideoStatistics/VideoStatistics';
+import { useModalLocationAndParams } from './hooks/useModalLocationAndParams';
+import { useVideoStats } from './hooks/useVideoStats';
 import styles from './VideoStation.module.css';
-import { VideoOverlay } from '../../../components/VideoOverlay/VideoOverlay';
-import { CopyVideoButton } from '../../../components/CopyVideoButton';
+import { VideoOverlay } from './components/VideoOverlay/VideoOverlay';
+import { CopyVideoButton } from './components/CopyVideoButton';
 
 export function VideoStation() {
   // Video search, location, and params
@@ -78,24 +78,32 @@ export function VideoStation() {
       >
         <AppShell.Navbar p="md">
           <Stack justify="center" align="center" className={styles['video-station-navbar']}>
-            <ActionIcon 
-              size="lg" 
-              variant="light" 
+            <ActionIcon
+              size="lg"
+              variant="light"
               onClick={handleUp}
               disabled={loading || videos.length === 0 || currentIndex <= 0}
-              className={loading || videos.length === 0 || currentIndex <= 0 ? styles['video-station-actionicon'] : ''}
+              className={
+                loading || videos.length === 0 || currentIndex <= 0
+                  ? styles['video-station-actionicon']
+                  : ''
+              }
               aria-disabled={loading || videos.length === 0 || currentIndex <= 0}
             >
               <span role="img" aria-label="Up Arrow">
                 ⬆️
               </span>
             </ActionIcon>
-            <ActionIcon 
-              size="lg" 
-              variant="light" 
+            <ActionIcon
+              size="lg"
+              variant="light"
               onClick={handleDown}
               disabled={loading || videos.length === 0 || currentIndex >= videos.length - 1}
-              className={loading || videos.length === 0 || currentIndex >= videos.length - 1 ? styles['video-station-actionicon'] : ''}
+              className={
+                loading || videos.length === 0 || currentIndex >= videos.length - 1
+                  ? styles['video-station-actionicon']
+                  : ''
+              }
               aria-disabled={loading || videos.length === 0 || currentIndex >= videos.length - 1}
             >
               <span role="img" aria-label="Down Arrow">
@@ -120,7 +128,9 @@ export function VideoStation() {
               </span>
             </ActionIcon>
             <CopyVideoButton
-              videoId={videos.length > 0 && currentIndex < videos.length ? videos[currentIndex] : null}
+              videoId={
+                videos.length > 0 && currentIndex < videos.length ? videos[currentIndex] : null
+              }
               disabled={loading || videos.length === 0}
             />
           </Stack>
