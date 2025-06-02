@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { AppShell, AppShellMain, ActionIcon, Stack } from '@mantine/core';
+import { AppShell, AppShellMain, ActionIcon, Stack, Modal } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { getVideos } from '../hooks/getVideos';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { VideoStationContext } from '../context/VideoStationContext';
+import { MapLocation } from '../../../components/MapLocation/MapLocation';
 
 export function VideoStation() {
   const [videos, setVideos] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [modalOpened, setModalOpened] = useState(false);
 
   useEffect(() => {
     if (!location) {
@@ -82,6 +84,12 @@ export function VideoStation() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleDown, handleUp]);
 
+  // Handler to update location from MapLocation
+  const handleSelectCoordinates = useCallback((coords: { lat: number; lon: number }) => {
+    setLocation(coords);
+    setModalOpened(false); // Optionally close modal after selection
+  }, []);
+
   return (
     <VideoStationContext.Provider value={{ currentIndex }}>
       <AppShell
@@ -99,6 +107,9 @@ export function VideoStation() {
             </ActionIcon>
             <ActionIcon size="lg" variant="light" onClick={handleDown}>
               <span role="img" aria-label="Down Arrow">⬇️</span>
+            </ActionIcon>
+            <ActionIcon size="lg" variant="light" onClick={() => setModalOpened(true)}>
+              <span role="img" aria-label="Info">ℹ️</span>
             </ActionIcon>
           </Stack>
         </AppShell.Navbar>
@@ -120,30 +131,55 @@ export function VideoStation() {
                 position: 'relative',
               }}
             >
-              {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                const videoId = videos[virtualRow.index];
-                return (
-                  <div
-                    key={videoId}
-                    ref={el => rowVirtualizer.measureElement?.(el)}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                      scrollSnapAlign: 'start',
-                    }}
-                  >
-                    <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
-                  </div>
-                );
-              })}
+              {videos.length === 0 ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100vh',
+                  fontSize: 22,
+                  color: '#888',
+                  textAlign: 'center',
+                  padding: 32,
+                }}>
+                  No recent videos were found. Try a different location!
+                </div>
+              ) : (
+                rowVirtualizer.getVirtualItems().map(virtualRow => {
+                  const videoId = videos[virtualRow.index];
+                  return (
+                    <div
+                      key={videoId}
+                      ref={el => rowVirtualizer.measureElement?.(el)}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualRow.size}px`,
+                        transform: `translateY(${virtualRow.start}px)`,
+                        scrollSnapAlign: 'start',
+                      }}
+                    >
+                      <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </AppShellMain>
       </AppShell>
+      <Modal
+        opened={modalOpened}
+        onClose={() => setModalOpened(false)}
+        title="Search for a location, or select one on the map"
+        centered
+      >
+        <div>
+          <MapLocation lat={location?.lat} lon={location?.lon} zoom={13} onSelectCoordinates={handleSelectCoordinates} />
+        </div>
+      </Modal>
     </VideoStationContext.Provider>
   );
 }
