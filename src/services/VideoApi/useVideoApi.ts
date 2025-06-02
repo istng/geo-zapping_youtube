@@ -4,7 +4,6 @@ export class VideoApiService {
   // Fetch videos (search)
   async getVideos(params: {
     location: { lat: number; lon: number };
-    search_query: string;
     maxResults?: number;
     locationRadius?: number;
     order?: string;
@@ -15,7 +14,6 @@ export class VideoApiService {
       body: JSON.stringify({
         lat: params.location.lat,
         lon: params.location.lon,
-        search_query: params.search_query,
         maxResults: params.maxResults ?? 20,
         locationRadius: params.locationRadius ?? 3000,
         order: params.order ?? 'date',

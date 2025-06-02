@@ -1,36 +1,62 @@
 // components/YoutubeVideo/YoutubeVideo.tsx
-import { useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { AspectRatio } from '@mantine/core';
 import { useVideoStationContext } from '../../pages/VideoStation/context/VideoStationContext';
 
-export function YouTubeEmbed({ videoId, index }: { videoId: string; index: number }) {
+export type YouTubeEmbedHandle = {
+  play: () => void;
+  pause: () => void;
+  togglePlayPause: () => void;
+};
+
+export const YouTubeEmbed = forwardRef<
+  YouTubeEmbedHandle,
+  { videoId: string; index: number; setIsPlaying: any }
+>(({ videoId, index, setIsPlaying }, ref) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { currentIndex } = useVideoStationContext();
   const isCurrent = index === currentIndex;
+  const [playing, setPlaying] = useState(false);
 
   // Play/pause methods
   const play = () => {
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
-      '*'
-    );
+    if (isCurrent) {
+      iframeRef.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+        '*',
+      );
+      setPlaying(true);
+    }
   };
   const pause = () => {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }),
-      '*'
+      '*',
     );
+    setPlaying(false);
   };
-  
-  // Effect: play if current, pause if not
-  useEffect(() => {
-    if (isCurrent) {
-      play();
+  const togglePlayPause = () => {
+    if (playing) {
+      pause();
     } else {
+      play();
+    }
+  };
+
+  useEffect(() => {
+    if (!isCurrent) {
       pause();
     }
-    // Only run when currentIndex or index changes
   }, [isCurrent]);
+
+  // Expose play, pause, and togglePlayPause methods to parent via ref
+  useImperativeHandle(ref, () => ({ play, pause, togglePlayPause }), [isCurrent, playing]);
+
+  useEffect(() => {
+    if (isCurrent) {
+      setIsPlaying(playing);
+    }
+  }, [playing]);
 
   return (
     <AspectRatio ratio={16 / 9} style={{ width: '100%', height: '100%' }}>
@@ -44,4 +70,4 @@ export function YouTubeEmbed({ videoId, index }: { videoId: string; index: numbe
       />
     </AspectRatio>
   );
-}
+});

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { AppShell, AppShellMain, ActionIcon, Stack, Modal } from '@mantine/core';
 import { YouTubeEmbed } from '../../../components/YoutubeEmbed/YoutubeEmbed';
+import type { YouTubeEmbedHandle } from '../../../components/YoutubeEmbed/YoutubeEmbed';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { VideoStationContext } from '../context/VideoStationContext';
 import { MapLocation } from '../../../components/MapLocation/MapLocation';
@@ -9,17 +10,15 @@ import { useVideoSearch } from '../hooks/useVideoSearch';
 import { useVideoNavigation } from '../hooks/useVideoNavigation';
 import { useLocationModal } from '../hooks/useLocationModal';
 import { VideoStatistics } from '../../../components/VideoStatistics/VideoStatistics';
+import { useModalLocationAndParams } from '../hooks/useModalLocationAndParams';
+import { useVideoStats } from '../hooks/useVideoStats';
+import styles from './VideoStation.module.css';
+import { VideoOverlay } from '../../../components/VideoOverlay/VideoOverlay';
 
 export function VideoStation() {
   // Video search, location, and params
-  const {
-    videos,
-    location,
-    setLocation,
-    searchParams,
-    setSearchParams,
-    loading,
-  } = useVideoSearch();
+  const { videos, location, setLocation, searchParams, setSearchParams, loading } =
+    useVideoSearch();
 
   // Virtualizer setup
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,67 +29,41 @@ export function VideoStation() {
     estimateSize: () => window.innerHeight, // Each video is 100vh
     overscan: parseInt(import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
   });
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      rowVirtualizer.scrollToIndex(index, { align: 'center' });
+    },
+    [rowVirtualizer],
+  );
 
-  // Video navigation (currentIndex, up/down, scroll)
-  const {
-    currentIndex,
-    handleUp,
-    handleDown,
-    setCurrentIndex,
-    scrollToIndex,
-  } = useVideoNavigation(videos.length, rowVirtualizer);
+  // Video navigation (currentIndex, up/down, setting currentIndex)
+  const { currentIndex, handleUp, handleDown, setCurrentIndex, shouldPlay, setShouldPlay } =
+    useVideoNavigation(videos.length, scrollToIndex);
 
   // Modal and location selection
-  const {
-    modalOpened,
-    setModalOpened,
-    // handleSelectCoordinates, // No longer needed
-  } = useLocationModal(setLocation);
-
-  const [statsModalOpened, setStatsModalOpened] = useState(false);
-  // Track last statsIds to avoid unnecessary fetches
-  const [statsIds, setStatsIds] = useState<string[]>([]);
-  const prevVideosRef = useRef<string[]>([]);
-
-  // When stats modal opens, update statsIds if videos changed
-  useEffect(() => {
-    if (statsModalOpened) {
-      const videosChanged =
-        videos.length !== prevVideosRef.current.length ||
-        videos.some((id, i) => id !== prevVideosRef.current[i]);
-      if (videosChanged) {
-        setStatsIds(videos);
-        prevVideosRef.current = videos;
-      }
-    }
-  }, [statsModalOpened, videos]);
+  const { modalOpened, setModalOpened } = useLocationModal(setLocation);
 
   // Local state for modal (location and search params)
-  const [modalLocation, setModalLocation] = useState<{ lat: number; lon: number } | null>(location);
-  const [modalParams, setModalParams] = useState({
-    radius: searchParams.locationRadius,
-    orderBy: searchParams.order,
-    maxResults: searchParams.maxResults,
-  });
+  const { modalLocation, setModalLocation, modalParams, setModalParams } =
+    useModalLocationAndParams(location, searchParams, modalOpened);
 
-  // Keep modal state in sync with main state when modal opens
-  useEffect(() => {
-    if (modalOpened) {
-      setModalLocation(location);
-      setModalParams({
-        radius: searchParams.locationRadius,
-        orderBy: searchParams.order,
-        maxResults: searchParams.maxResults,
-      });
-    }
-  }, [modalOpened, location, searchParams]);
+  // Stats modal and video stats state
+  const { statsModalOpened, setStatsModalOpened, statsIds } = useVideoStats(videos);
 
-  // Fix: scroll to the currentIndex when it changes
+  // Ref for the current YouTubeEmbed
+  const currentVideoRef = useRef<YouTubeEmbedHandle>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleOverlayClick = () => {
+    currentVideoRef.current?.togglePlayPause?.();
+  };
+
   useEffect(() => {
-    if (videos.length > 0) {
-      rowVirtualizer.scrollToIndex(currentIndex, { align: 'center' });
+    if (shouldPlay) {
+      currentVideoRef.current?.play();
+      setShouldPlay(false);
     }
-  }, [currentIndex, videos.length]);
+  }, [shouldPlay]);
 
   return (
     <VideoStationContext.Provider value={{ currentIndex }}>
@@ -103,91 +76,77 @@ export function VideoStation() {
         }}
       >
         <AppShell.Navbar p="md">
-          <Stack justify="center" align="center" style={{ height: '100%' }}>
+          <Stack justify="center" align="center" className={styles['video-station-navbar']}>
             <ActionIcon size="lg" variant="light" onClick={handleUp}>
-              <span role="img" aria-label="Up Arrow">⬆️</span>
+              <span role="img" aria-label="Up Arrow">
+                ⬆️
+              </span>
             </ActionIcon>
             <ActionIcon size="lg" variant="light" onClick={handleDown}>
-              <span role="img" aria-label="Down Arrow">⬇️</span>
+              <span role="img" aria-label="Down Arrow">
+                ⬇️
+              </span>
             </ActionIcon>
             <ActionIcon size="lg" variant="light" onClick={() => setModalOpened(true)}>
-                <span role="img" aria-label="Search">🔍</span>
+              <span role="img" aria-label="Search">
+                🔍
+              </span>
             </ActionIcon>
-            <ActionIcon size="lg" variant="light" onClick={() => setStatsModalOpened(true)} disabled={loading} style={loading ? { color: '#bbb', cursor: 'not-allowed' } : {}}>
-                <span role="img" aria-label="Statistics">📊</span>
+            <ActionIcon
+              size="lg"
+              variant="light"
+              onClick={() => setStatsModalOpened(true)}
+              disabled={loading}
+              className={loading ? styles['video-station-actionicon'] : ''}
+              aria-disabled={loading}
+            >
+              <span role="img" aria-label="Statistics">
+                📊
+              </span>
             </ActionIcon>
           </Stack>
         </AppShell.Navbar>
 
-        <AppShellMain style={{ height: '100vh', overflow: 'hidden' }}>
+        <AppShellMain className={styles['video-station-main']}>
           {loading ? (
-            <div style={{
-              height: '100vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 28,
-              color: '#888',
-              zIndex: 10,
-              position: 'absolute',
-              width: '100%',
-              left: 0,
-              top: 0,
-            }}>
-              Loading videos...
-            </div>
+            <div className={styles['video-station-loading']}>Loading videos...</div>
           ) : videos.length === 0 ? (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100vh',
-              fontSize: 22,
-              color: '#888',
-              textAlign: 'center',
-              padding: 32,
-            }}>
+            <div className={styles['video-station-empty']}>
               No recent videos were found. Try a different location!
             </div>
           ) : (
-            <div
-              ref={parentRef}
-              style={{
-                height: '100vh',
-                overflowY: 'scroll',
-                scrollSnapType: 'y mandatory',
-                position: 'relative',
-              }}
-            >
-              <div
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                  width: '100%',
-                  position: 'relative',
-                }}
-              >
-                {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                  const videoId = videos[virtualRow.index];
-                  return (
-                    <div
-                      key={videoId}
-                      ref={el => rowVirtualizer.measureElement?.(el)}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                        scrollSnapAlign: 'start',
-                      }}
-                    >
-                      <YouTubeEmbed videoId={videoId} index={virtualRow.index} />
-                    </div>
-                  );
-                })}
+            <>
+              <VideoOverlay onClick={handleOverlayClick} isPlaying={isPlaying} />
+              <div ref={parentRef} className={styles['video-station-scroll']}>
+                <div
+                  className={styles['video-station-virtualizer']}
+                  style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+                >
+                  {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                    const videoId = videos[virtualRow.index];
+                    const isCurrent = virtualRow.index === currentIndex;
+                    return (
+                      <div
+                        key={videoId}
+                        ref={(el) => rowVirtualizer.measureElement?.(el)}
+                        className={styles['video-station-virtual-item']}
+                        style={{
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                      >
+                        <YouTubeEmbed
+                          ref={isCurrent ? currentVideoRef : undefined}
+                          videoId={videoId}
+                          index={virtualRow.index}
+                          setIsPlaying={setIsPlaying}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </AppShellMain>
       </AppShell>
@@ -202,25 +161,22 @@ export function VideoStation() {
           body: { padding: 0 },
         }}
       >
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+        <div className={styles['video-station-modal-flex']}>
           <div style={{ flex: 1 }}>
             <MapLocation
               lat={modalLocation?.lat}
               lon={modalLocation?.lon}
               zoom={13}
-              onChange={coords => setModalLocation(coords)}
+              onChange={(coords) => setModalLocation(coords)}
             />
           </div>
-          <div style={{ minWidth: 280, maxWidth: 320 }}>
-            <SearchParamsForm
-              values={modalParams}
-              onChange={setModalParams}
-            />
+          <div className={styles['video-station-modal-form']}>
+            <SearchParamsForm values={modalParams} onChange={setModalParams} />
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 16, gap: 8 }}>
+        <div className={styles['video-station-modal-footer']}>
           <button
-            style={{ padding: '8px 24px', fontWeight: 'bold' }}
+            className={styles['video-station-modal-apply']}
             onClick={() => {
               if (modalLocation) setLocation(modalLocation);
               setSearchParams({
@@ -243,22 +199,22 @@ export function VideoStation() {
         centered
         size="auto"
         styles={{
-          content: { padding: 24, width: "80%" },
+          content: { padding: 24, width: '80%' },
           body: { padding: 0 },
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={styles['video-station-stats-flex']}>
           {statsIds.length > 0 ? (
-            <VideoStatistics 
-              ids={statsIds} 
-              onBarClick={index => {
+            <VideoStatistics
+              ids={statsIds}
+              onBarClick={(index) => {
                 setCurrentIndex(index);
                 scrollToIndex(index);
                 setStatsModalOpened(false);
               }}
             />
           ) : (
-            <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show.</div>
+            <div className={styles['video-station-stats-empty']}>No video statistics to show.</div>
           )}
         </div>
       </Modal>

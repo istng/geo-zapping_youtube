@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export function useVideoNavigation(videosLength: number, rowVirtualizer: any) {
+export function useVideoNavigation(videosLength: number, scrollToIndex: any) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const scrollToIndex = useCallback((index: number) => {
-    rowVirtualizer.scrollToIndex(index, { align: 'center' });
-  }, [rowVirtualizer]);
+  const [shouldPlay, setShouldPlay] = useState(false);
 
   const handleUp = useCallback(() => {
     if (currentIndex > 0) {
       const newIndex = currentIndex - 1;
       setCurrentIndex(newIndex);
       scrollToIndex(newIndex);
+      setShouldPlay(true);
     }
   }, [currentIndex, scrollToIndex]);
 
@@ -20,14 +18,9 @@ export function useVideoNavigation(videosLength: number, rowVirtualizer: any) {
       const newIndex = currentIndex + 1;
       setCurrentIndex(newIndex);
       scrollToIndex(newIndex);
+      setShouldPlay(true);
     }
   }, [currentIndex, scrollToIndex, videosLength]);
-
-  useEffect(() => {
-    if (videosLength > 0) {
-      rowVirtualizer.scrollToIndex(currentIndex, { align: 'center' });
-    }
-  }, [currentIndex, videosLength, rowVirtualizer]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -46,6 +39,7 @@ export function useVideoNavigation(videosLength: number, rowVirtualizer: any) {
     setCurrentIndex,
     handleUp,
     handleDown,
-    scrollToIndex,
+    shouldPlay,
+    setShouldPlay,
   };
 }

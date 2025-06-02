@@ -3,11 +3,6 @@ import { expect, describe, it, vi, beforeEach, beforeAll } from 'vitest';
 import { VideoStation } from '../components/VideoStation';
 import { MantineProvider } from '../../../libs/mantine/MantineProvider';
 
-//use vi.mock to mock the getVideos hook
-vi.mock('../hooks/getVideos', () => ({
-  getVideos: vi.fn().mockResolvedValue({ videos: ['PHzrDLguIy0', '3yWi8HkGnCg'] }),
-}));
-
 const renderVideoStation = () => {
   return render(
     <MantineProvider>
