@@ -36,6 +36,8 @@ export function VideoStation() {
     currentIndex,
     handleUp,
     handleDown,
+    setCurrentIndex,
+    scrollToIndex,
   } = useVideoNavigation(videos.length, rowVirtualizer);
 
   // Modal and location selection
@@ -46,7 +48,22 @@ export function VideoStation() {
   } = useLocationModal(setLocation);
 
   const [statsModalOpened, setStatsModalOpened] = useState(false);
+  // Track last statsIds to avoid unnecessary fetches
   const [statsIds, setStatsIds] = useState<string[]>([]);
+  const prevVideosRef = useRef<string[]>([]);
+
+  // When stats modal opens, update statsIds if videos changed
+  useEffect(() => {
+    if (statsModalOpened) {
+      const videosChanged =
+        videos.length !== prevVideosRef.current.length ||
+        videos.some((id, i) => id !== prevVideosRef.current[i]);
+      if (videosChanged) {
+        setStatsIds(videos);
+        prevVideosRef.current = videos;
+      }
+    }
+  }, [statsModalOpened, videos]);
 
   // Local state for modal (location and search params)
   const [modalLocation, setModalLocation] = useState<{ lat: number; lon: number } | null>(location);
@@ -96,7 +113,7 @@ export function VideoStation() {
             <ActionIcon size="lg" variant="light" onClick={() => setModalOpened(true)}>
                 <span role="img" aria-label="Search">🔍</span>
             </ActionIcon>
-            <ActionIcon size="lg" variant="light" onClick={() => setStatsModalOpened(true)}>
+            <ActionIcon size="lg" variant="light" onClick={() => setStatsModalOpened(true)} disabled={loading} style={loading ? { color: '#bbb', cursor: 'not-allowed' } : {}}>
                 <span role="img" aria-label="Statistics">📊</span>
             </ActionIcon>
           </Stack>
@@ -111,7 +128,6 @@ export function VideoStation() {
               justifyContent: 'center',
               fontSize: 28,
               color: '#888',
-              background: 'rgba(255,255,255,0.8)',
               zIndex: 10,
               position: 'absolute',
               width: '100%',
@@ -220,6 +236,7 @@ export function VideoStation() {
         </div>
       </Modal>
       <Modal
+        keepMounted={true}
         opened={statsModalOpened}
         onClose={() => setStatsModalOpened(false)}
         title="Video Statistics"
@@ -231,17 +248,17 @@ export function VideoStation() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <button
-            style={{ marginBottom: 16 }}
-            onClick={() => setStatsIds(videos)}
-            disabled={videos.length === 0}
-          >
-            Show statistics for current videos
-          </button>
           {statsIds.length > 0 ? (
-            <VideoStatistics ids={statsIds} />
+            <VideoStatistics 
+              ids={statsIds} 
+              onBarClick={index => {
+                setCurrentIndex(index);
+                scrollToIndex(index);
+                setStatsModalOpened(false);
+              }}
+            />
           ) : (
-            <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show. Click the button above to load stats.</div>
+            <div style={{ color: '#888', textAlign: 'center' }}>No video statistics to show.</div>
           )}
         </div>
       </Modal>

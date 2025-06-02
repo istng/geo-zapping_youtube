@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useVideoApi } from '../../../services/VideoApi/useVideoApi';
 
 export interface VideoStatistics {
   id: string;
@@ -18,6 +19,7 @@ export function useVideoDetails(ids: string[]) {
   const [data, setData] = useState<VideoStatistics[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { getVideoDetails } = useVideoApi();
 
   useEffect(() => {
     if (!ids.length) {
@@ -26,15 +28,9 @@ export function useVideoDetails(ids: string[]) {
     }
     setLoading(true);
     setError(null);
-    fetch(import.meta.env.VITE_MATTW_YT_DETAILS_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to fetch video details');
-        const json = await res.json();
-        setData(json.items || []);
+    getVideoDetails(ids)
+      .then((items) => {
+        setData(items);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));

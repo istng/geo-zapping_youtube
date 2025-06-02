@@ -39,5 +39,24 @@ describe('VideoStation', async () => {
     expect(screen.getByText('⬆️')).toBeInTheDocument();
     expect(screen.getByText('⬇️')).toBeInTheDocument();
     expect(screen.getByText('🔍')).toBeInTheDocument();
-  })
+    expect(screen.getByText('📊')).toBeInTheDocument();
+  });
+
+  it('greys and disables statistics button while loading', async () => {
+    // Mock useVideoSearch to return loading: true
+    vi.doMock('../hooks/useVideoSearch', () => ({
+      useVideoSearch: () => ({
+        videos: ['PHzrDLguIy0', '3yWi8HkGnCg'],
+        location: { lat: 0, lon: 0 },
+        setLocation: vi.fn(),
+        searchParams: { maxResults: 20, locationRadius: 3000, order: 'date' },
+        setSearchParams: vi.fn(),
+        loading: true,
+      }),
+    }));
+    const statsButton = screen.getByRole('button', { name: /Statistics/i });
+    expect(statsButton).toBeDisabled();
+    expect(statsButton).toHaveStyle('color: #bbb');
+    expect(statsButton).toHaveStyle('cursor: not-allowed');
+  });
 });

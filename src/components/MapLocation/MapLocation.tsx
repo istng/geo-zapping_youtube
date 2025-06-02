@@ -140,7 +140,6 @@ export function MapLocation({ lat = -34.6089399, lon = -58.3896266, zoom = 13, o
           </Popup>
         </Marker>
       </MapContainer>
-      {/* Removed the Select this location button, now controlled by parent */}
     </div>
   );
 }

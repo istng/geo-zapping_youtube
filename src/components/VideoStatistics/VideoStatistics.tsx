@@ -5,9 +5,10 @@ import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
 
 interface VideoStatisticsProps {
   ids: string[];
+  onBarClick?: (index: number) => void;
 }
 
-export function VideoStatistics({ ids }: VideoStatisticsProps) {
+export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
   const { data, loading, error } = useVideoDetails(ids);
@@ -22,15 +23,12 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
     channel: video.snippet.channelTitle,
     viewCount: Number(video.statistics.viewCount ?? 0),
   }));
-  console.log('VideoStatistics chartData:', chartData);
 
-  // Pick label color and shadow based on theme
   const labelColor = colorScheme === 'dark' ? theme.white : theme.black;
   const labelShadow = colorScheme === 'dark'
     ? '1px 1px 4px rgba(0,0,0,0.8)'
     : '1px 1px 4px rgba(255,255,255,0.7)';
 
-  // Custom label for bars: show title inside/overlapping the bar, right-aligned
   const renderBarLabel = (props: any) => {
     const { x, y, height, index } = props;
     const title = chartData[index]?.name;
@@ -48,7 +46,6 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
     );
   };
 
-  // Custom tick for Y axis: only channel name, theme-aware color
   const renderCustomYAxisTick = (props: any) => {
     const { x, y, payload } = props;
     return (
@@ -60,8 +57,38 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
     );
   };
 
+  // Custom shape for full-row clickable bar
+  const FullRowBar = (props: any) => {
+    const { y, height, index } = props;
+    return (
+      <g>
+        <rect
+          x={0}
+          y={y}
+          width="100%"
+          height={height}
+          fill="transparent"
+          style={{ cursor: onBarClick ? 'pointer' : undefined }}
+          onClick={() => onBarClick && onBarClick(index)}
+        />
+        <rect
+          x={props.x}
+          y={y}
+          width={props.width}
+          height={height}
+          fill={props.fill}
+          rx={2}
+          ry={2}
+          style={{ cursor: onBarClick ? 'pointer' : undefined }}
+          onClick={() => onBarClick && onBarClick(index)}
+        />
+        {renderBarLabel(props)}
+      </g>
+    );
+  };
+
   return (
-    <div style={{ width: '100%', minHeight: 400, height: 500 }}>
+    <div style={{ width: '100%', minHeight: 400, height: 530 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
@@ -88,6 +115,7 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
             dataKey="channel"
             width={180}
             tick={renderCustomYAxisTick}
+            interval={0}
           />
           <Tooltip 
             formatter={(value, name) => {
@@ -97,7 +125,13 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
                 return [value, labelMap[name] || name];
             }}
           />
-          <Bar dataKey="viewCount" fill="#8884d8" radius={[2, 2, 2, 2]} label={renderBarLabel} />
+          <Bar 
+            dataKey="viewCount" 
+            fill="#8884d8" 
+            radius={[2, 2, 2, 2]} 
+            label={false}
+            shape={FullRowBar}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
