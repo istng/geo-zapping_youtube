@@ -4,12 +4,14 @@ import styles from './VideoOverlay.module.css';
 interface VideoOverlayProps extends React.HTMLAttributes<HTMLDivElement> {
   zIndex?: number;
   isPlaying?: boolean;
+  showPersistentPlay?: boolean;
 }
 
 export const VideoOverlay: React.FC<VideoOverlayProps> = ({
   zIndex = 10,
   style,
   isPlaying,
+  showPersistentPlay = false,
   ...props
 }) => {
   const [showIcon, setShowIcon] = React.useState<null | 'play' | 'pause'>(null);
@@ -25,6 +27,17 @@ export const VideoOverlay: React.FC<VideoOverlayProps> = ({
 
   return (
     <div className={styles.overlay} style={{ zIndex, ...style }} {...props}>
+      {/* Persistent play button when user hasn't interacted */}
+      {showPersistentPlay && (
+        <img
+          src="/play.svg"
+          alt="Click to play"
+          className={`${styles.iconOverlay} ${styles.persistent}`}
+          draggable={false}
+        />
+      )}
+      
+      {/* Temporary feedback icons */}
       <img
         src="/play.svg"
         alt="Play"
