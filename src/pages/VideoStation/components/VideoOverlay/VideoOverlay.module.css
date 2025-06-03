@@ -25,3 +25,12 @@
 .visible {
   opacity: 1;
 }
+
+.persistent {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.persistent:hover {
+  opacity: 1;
+}

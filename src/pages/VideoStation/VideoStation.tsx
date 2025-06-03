@@ -54,21 +54,33 @@ export function VideoStation() {
   // Ref for the current YouTubeEmbed
   const currentVideoRef = useRef<YouTubeEmbedHandle>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
 
   const handleOverlayClick = () => {
+    setUserHasInteracted(true);
     currentVideoRef.current?.togglePlayPause?.();
   };
 
+  const handleArrowClick = (direction: 'up' | 'down') => {
+    setUserHasInteracted(true);
+    if (direction === 'up') {
+      handleUp();
+    } else {
+      handleDown();
+    }
+  };
+
   useEffect(() => {
-    if (shouldPlay) {
+    if (shouldPlay && userHasInteracted) {
       currentVideoRef.current?.play();
       setShouldPlay(false);
     }
-  }, [shouldPlay]);
+  }, [shouldPlay, userHasInteracted]);
 
   useEffect(() => {
     setCurrentIndex(0);
     scrollToIndex(0);
+    setUserHasInteracted(false);
   }, [videos]);
 
   return (
@@ -86,7 +98,7 @@ export function VideoStation() {
             <ActionIcon
               size="lg"
               variant="light"
-              onClick={handleUp}
+              onClick={() => handleArrowClick('up')}
               disabled={loading || videos.length === 0 || currentIndex <= 0}
               className={
                 loading || videos.length === 0 || currentIndex <= 0
@@ -102,7 +114,7 @@ export function VideoStation() {
             <ActionIcon
               size="lg"
               variant="light"
-              onClick={handleDown}
+              onClick={() => handleArrowClick('down')}
               disabled={loading || videos.length === 0 || currentIndex >= videos.length - 1}
               className={
                 loading || videos.length === 0 || currentIndex >= videos.length - 1
@@ -150,7 +162,11 @@ export function VideoStation() {
             </div>
           ) : (
             <>
-              <VideoOverlay onClick={handleOverlayClick} isPlaying={isPlaying} />
+              <VideoOverlay 
+                onClick={handleOverlayClick} 
+                isPlaying={isPlaying} 
+                showPersistentPlay={!userHasInteracted}
+              />
               <div ref={parentRef} className={styles['video-station-scroll']}>
                 <div
                   className={styles['video-station-virtualizer']}
