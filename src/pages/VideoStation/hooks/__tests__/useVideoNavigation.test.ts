@@ -39,4 +39,43 @@ describe('useVideoNavigation', () => {
     });
     expect(result.current.currentIndex).toBe(1);
   });
+
+  it('should allow setting currentIndex directly to any valid index', () => {
+    const scrollToIndex = getScrollToIndex();
+    const { result } = renderHook(() => useVideoNavigation(5, scrollToIndex));
+
+    act(() => {
+      result.current.setCurrentIndex(3);
+    });
+    expect(result.current.currentIndex).toBe(3);
+
+    act(() => {
+      result.current.setCurrentIndex(0);
+    });
+    expect(result.current.currentIndex).toBe(0);
+  });
+
+  it('should reset currentIndex to zero when search is applied', () => {
+    const scrollToIndex = getScrollToIndex();
+    const { result } = renderHook(() => useVideoNavigation(5, scrollToIndex));
+
+    act(() => {
+      result.current.handleDown();
+    });
+    expect(result.current.currentIndex).toBe(1);
+    expect(scrollToIndex).toHaveBeenCalledWith(1);
+    
+    act(() => {
+      result.current.handleDown();
+    });
+    expect(result.current.currentIndex).toBe(2);
+    expect(scrollToIndex).toHaveBeenCalledWith(2);
+
+    scrollToIndex.mockClear();
+
+    act(() => {
+      result.current.setCurrentIndex(0);
+    });
+    expect(result.current.currentIndex).toBe(0);
+  });
 });

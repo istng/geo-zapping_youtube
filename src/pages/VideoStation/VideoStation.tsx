@@ -66,6 +66,11 @@ export function VideoStation() {
     }
   }, [shouldPlay]);
 
+  useEffect(() => {
+    setCurrentIndex(0);
+    scrollToIndex(0);
+  }, [videos]);
+
   return (
     <VideoStationContext.Provider value={{ currentIndex }}>
       <AppShell
