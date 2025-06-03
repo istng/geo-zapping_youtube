@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "A geolocation-based YouTube video discovery application",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
