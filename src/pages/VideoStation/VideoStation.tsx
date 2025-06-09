@@ -27,12 +27,20 @@ export function VideoStation() {
   const rowVirtualizer = useVirtualizer({
     count: videos.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => window.innerHeight, // Each video is 100vh
+    estimateSize: () => window.innerHeight, 
     overscan: parseInt(import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
+    scrollPaddingStart: window.innerHeight * 2, 
+    scrollPaddingEnd: window.innerHeight * 2,
   });
+  
   const scrollToIndex = useCallback(
     (index: number) => {
+      // First call to trigger initial scroll
       rowVirtualizer.scrollToIndex(index, { align: 'center' });
+      // Second call on next frame to handle any measurement updates
+      requestAnimationFrame(() => {
+        rowVirtualizer.scrollToIndex(index, { align: 'center' });
+      });
     },
     [rowVirtualizer],
   );
