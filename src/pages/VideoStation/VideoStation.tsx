@@ -29,8 +29,8 @@ export function VideoStation() {
     getScrollElement: () => parentRef.current,
     estimateSize: () => window.innerHeight, 
     overscan: parseInt(import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
-    scrollPaddingStart: window.innerHeight * 2, 
-    scrollPaddingEnd: window.innerHeight * 2,
+    scrollPaddingStart: window.innerHeight * 5, 
+    scrollPaddingEnd: window.innerHeight * 20,
   });
   
   const scrollToIndex = useCallback(
@@ -270,11 +270,6 @@ export function VideoStation() {
           {statsIds.length > 0 ? (
             <VideoStatistics
               ids={statsIds}
-              onBarClick={(index) => {
-                setCurrentIndex(index);
-                scrollToIndex(index);
-                setStatsModalOpened(false);
-              }}
             />
           ) : (
             <div className={styles['video-station-stats-empty']}>No video statistics to show.</div>

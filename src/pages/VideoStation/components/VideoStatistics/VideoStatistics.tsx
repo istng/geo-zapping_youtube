@@ -5,10 +5,9 @@ import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
 
 interface VideoStatisticsProps {
   ids: string[];
-  onBarClick?: (index: number) => void;
 }
 
-export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
+export function VideoStatistics({ ids }: VideoStatisticsProps) {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
   const { data, loading, error } = useVideoDetails(ids);
@@ -57,9 +56,9 @@ export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
     );
   };
 
-  // Custom shape for full-row clickable bar
+  // Custom shape for non-clickable bar
   const FullRowBar = (props: any) => {
-    const { y, height, index } = props;
+    const { y, height } = props;
     return (
       <g>
         <rect
@@ -68,8 +67,6 @@ export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
           width="100%"
           height={height}
           fill="transparent"
-          style={{ cursor: onBarClick ? 'pointer' : undefined }}
-          onClick={() => onBarClick && onBarClick(index)}
         />
         <rect
           x={props.x}
@@ -79,8 +76,6 @@ export function VideoStatistics({ ids, onBarClick }: VideoStatisticsProps) {
           fill={props.fill}
           rx={2}
           ry={2}
-          style={{ cursor: onBarClick ? 'pointer' : undefined }}
-          onClick={() => onBarClick && onBarClick(index)}
         />
         {renderBarLabel(props)}
       </g>
