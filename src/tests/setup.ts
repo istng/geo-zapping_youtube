@@ -1,15 +1,12 @@
 import '@testing-library/jest-dom';
 import { beforeAll, afterAll, afterEach, vi } from 'vitest';
-import { server } from '../mocks/server'; // adjust path to your MSW setup
+import { server } from '../mocks/server';
 
-// Set up VITE_MATTW_YT_API env var for MSW
 if (!import.meta.env) {
   // @ts-ignore
   import.meta.env = {};
 }
-import.meta.env.VITE_MATTW_YT_API = '/api/videos';
-import.meta.env.VITE_MATTW_YT_DETAILS_API = '/api/video-details';
-import.meta.env.VITE_LOGIN_URL = '/api/login';
+import.meta.env.VITE_YOUTUBE_API_KEY = 'test-api-key';
 
 // setupTests.ts
 Object.defineProperty(window, 'matchMedia', {
