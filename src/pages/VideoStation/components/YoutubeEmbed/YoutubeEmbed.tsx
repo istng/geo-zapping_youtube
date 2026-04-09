@@ -17,12 +17,6 @@ export const YouTubeEmbed = forwardRef<
   const { currentIndex } = useVideoStationContext();
   const isCurrent = index === currentIndex;
   const [playing, setPlaying] = useState(false);
-  const [showCover, setShowCover] = useState(true);
-
-  // Reset cover whenever the video changes
-  useEffect(() => {
-    setShowCover(true);
-  }, [videoId]);
 
   // Play/pause methods
   const play = () => {
@@ -32,7 +26,6 @@ export const YouTubeEmbed = forwardRef<
         '*',
       );
       setPlaying(true);
-      setShowCover(false);
     }
   };
   const pause = () => {
@@ -76,12 +69,16 @@ export const YouTubeEmbed = forwardRef<
           allowFullScreen
           style={{ position: 'absolute', inset: 0, border: 0, width: '100%', height: '100%' }}
         />
-        {showCover && (
-          <div
+        {!playing && (
+          <img
+            src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+            alt=""
             style={{
               position: 'absolute',
               inset: 0,
-              background: '#000',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
               zIndex: 1,
               pointerEvents: 'none',
             }}

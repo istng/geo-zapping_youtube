@@ -18,8 +18,10 @@ import { CopyVideoButton } from './components/CopyVideoButton';
 
 export function VideoStation() {
   // Video search, location, and params
-  const { videos, location, setLocation, searchParams, setSearchParams, loading, fetchMore } =
-    useVideoSearch();
+  const {
+    videos, location, setLocation, searchParams, setSearchParams,
+    loading, fetchMore, excludeShorts, setExcludeShorts,
+  } = useVideoSearch();
 
   // Virtualizer setup
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,12 +85,12 @@ export function VideoStation() {
     }
   }, [shouldPlay, userHasInteracted]);
 
-  // Reset to top only on a fresh search (location or params changed), not on fetchMore appends
+  // Reset to top only on a fresh search (location, params, or Shorts toggle changed)
   useEffect(() => {
     setCurrentIndex(0);
     scrollToIndex(0);
     setUserHasInteracted(false);
-  }, [location, searchParams]);
+  }, [location, searchParams, excludeShorts]);
 
   // Auto-fetch more videos when approaching the end of the list
   useEffect(() => {
@@ -156,6 +158,16 @@ export function VideoStation() {
             >
               <span role="img" aria-label="Statistics">
                 📊
+              </span>
+            </ActionIcon>
+            <ActionIcon
+              size="lg"
+              variant={excludeShorts ? 'filled' : 'light'}
+              onClick={() => setExcludeShorts((v) => !v)}
+              title={excludeShorts ? 'Shorts hidden' : 'Shorts visible'}
+            >
+              <span role="img" aria-label="Toggle Shorts">
+                📱
               </span>
             </ActionIcon>
             <CopyVideoButton

@@ -14,6 +14,7 @@ export class VideoApiService {
     maxResults?: number;
     locationRadius?: number;
     order?: string;
+    excludeShorts?: boolean;
   }) {
     const { lat, lon } = params.location;
     const maxResults = params.maxResults ?? 20;
@@ -32,10 +33,34 @@ export class VideoApiService {
     const response = await fetch(url.toString());
     if (!response.ok) throw new Error('Videos not found');
     const data = await response.json();
-    const videos = (data.items ?? [])
+    const ids = (data.items ?? [])
       .map((item: { id: { videoId?: string } }) => item.id.videoId)
       .filter(Boolean) as string[];
-    return { videos };
+
+    if (!params.excludeShorts || ids.length === 0) return { videos: ids };
+
+    // Fetch snippet thumbnails to detect vertical (Short) videos by aspect ratio
+    const snippetUrl = new URL(`${YT_API_BASE}/videos`);
+    snippetUrl.searchParams.set('part', 'snippet');
+    snippetUrl.searchParams.set('id', ids.join(','));
+    snippetUrl.searchParams.set('key', this.apiKey);
+
+    const snippetResponse = await fetch(snippetUrl.toString());
+    if (!snippetResponse.ok) return { videos: ids }; // fall back to unfiltered
+
+    const snippetData = await snippetResponse.json();
+    const nonShortIds = new Set<string>(
+      (snippetData.items ?? [])
+        .filter((item: any) => {
+          const t = item.snippet?.thumbnails;
+          const thumb = t?.maxres ?? t?.standard ?? t?.high ?? t?.medium;
+          if (thumb?.width && thumb?.height) return thumb.height <= thumb.width;
+          return true; // can't tell → keep it
+        })
+        .map((item: any) => item.id as string),
+    );
+
+    return { videos: ids.filter((id) => nonShortIds.has(id)) };
   }
 
   async getVideoDetails(ids: string[]) {

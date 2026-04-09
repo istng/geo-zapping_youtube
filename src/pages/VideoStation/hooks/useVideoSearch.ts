@@ -12,6 +12,7 @@ export function useVideoSearch() {
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
   const fetchingMoreRef = useRef(false);
+  const [excludeShorts, setExcludeShorts] = useState(false);
 
   const { getVideos } = useVideoApi();
 
@@ -36,6 +37,7 @@ export function useVideoSearch() {
         maxResults: searchParams.maxResults,
         locationRadius: searchParams.locationRadius,
         order: searchParams.order,
+        excludeShorts,
       })
         .then((res) => {
           setVideos(res.videos);
@@ -44,7 +46,7 @@ export function useVideoSearch() {
           setLoading(false);
         });
     }
-  }, [location, searchParams]);
+  }, [location, searchParams, excludeShorts]);
 
   const fetchMore = useCallback(async (count = 5) => {
     if (!location || loading || fetchingMoreRef.current) return;
@@ -56,6 +58,7 @@ export function useVideoSearch() {
         maxResults: count,
         locationRadius: searchParams.locationRadius,
         order: searchParams.order,
+        excludeShorts,
       });
       setVideos((prev) => {
         const existing = new Set(prev);
@@ -79,5 +82,7 @@ export function useVideoSearch() {
     loading,
     fetchMore,
     fetchingMore,
+    excludeShorts,
+    setExcludeShorts,
   };
 }
