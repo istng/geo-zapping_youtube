@@ -19,29 +19,10 @@ export const YouTubeEmbed = forwardRef<
   const [playing, setPlaying] = useState(false);
   const [showCover, setShowCover] = useState(true);
 
-  // Reset cover whenever the video src changes
+  // Reset cover whenever the video changes
   useEffect(() => {
     setShowCover(true);
   }, [videoId]);
-
-  // Listen for YouTube's onStateChange via postMessage to know when playing starts
-  useEffect(() => {
-    const handleMessage = (e: MessageEvent) => {
-      if (e.source !== iframeRef.current?.contentWindow) return;
-      try {
-        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-        const state =
-          data?.event === 'onStateChange'
-            ? data.info
-            : data?.event === 'infoDelivery'
-              ? data?.info?.playerState
-              : undefined;
-        if (state === 1) setShowCover(false);
-      } catch {}
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
 
   // Play/pause methods
   const play = () => {
@@ -51,6 +32,7 @@ export const YouTubeEmbed = forwardRef<
         '*',
       );
       setPlaying(true);
+      setShowCover(false);
     }
   };
   const pause = () => {
