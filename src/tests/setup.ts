@@ -2,11 +2,7 @@ import '@testing-library/jest-dom';
 import { beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { server } from '../mocks/server';
 
-if (!import.meta.env) {
-  // @ts-ignore
-  import.meta.env = {};
-}
-import.meta.env.VITE_YOUTUBE_API_KEY = 'test-api-key';
+vi.stubEnv('VITE_YOUTUBE_API_KEY', 'test-api-key');
 
 // setupTests.ts
 Object.defineProperty(window, 'matchMedia', {
