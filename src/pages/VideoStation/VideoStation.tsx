@@ -83,11 +83,12 @@ export function VideoStation() {
     }
   }, [shouldPlay, userHasInteracted]);
 
+  // Reset to top only on a fresh search (location or params changed), not on fetchMore appends
   useEffect(() => {
     setCurrentIndex(0);
     scrollToIndex(0);
     setUserHasInteracted(false);
-  }, [videos]);
+  }, [location, searchParams]);
 
   // Auto-fetch more videos when approaching the end of the list
   useEffect(() => {
