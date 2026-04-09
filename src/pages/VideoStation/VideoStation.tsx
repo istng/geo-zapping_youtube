@@ -276,7 +276,7 @@ export function VideoStation() {
                 if (idx !== -1) {
                   setCurrentIndex(idx);
                   scrollToIndex(idx);
-                  setUserHasInteracted(true);
+                  setShouldPlay(true);
                 }
                 setStatsModalOpened(false);
               }}
