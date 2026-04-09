@@ -18,7 +18,7 @@ import { CopyVideoButton } from './components/CopyVideoButton';
 
 export function VideoStation() {
   // Video search, location, and params
-  const { videos, location, setLocation, searchParams, setSearchParams, loading } =
+  const { videos, location, setLocation, searchParams, setSearchParams, loading, fetchMore } =
     useVideoSearch();
 
   // Virtualizer setup
@@ -89,10 +89,12 @@ export function VideoStation() {
     setUserHasInteracted(false);
   }, [videos]);
 
+  // Auto-fetch more videos when approaching the end of the list
   useEffect(() => {
-    setCurrentIndex(0);
-    scrollToIndex(0);
-  }, [videos]);
+    if (!loading && videos.length > 0 && currentIndex >= videos.length - 2) {
+      fetchMore(5);
+    }
+  }, [currentIndex, videos.length, loading]);
 
   return (
     <VideoStationContext.Provider value={{ currentIndex }}>
@@ -269,6 +271,15 @@ export function VideoStation() {
           {statsIds.length > 0 ? (
             <VideoStatistics
               ids={statsIds}
+              onVideoClick={(id) => {
+                const idx = videos.indexOf(id);
+                if (idx !== -1) {
+                  setCurrentIndex(idx);
+                  scrollToIndex(idx);
+                  setUserHasInteracted(true);
+                }
+                setStatsModalOpened(false);
+              }}
             />
           ) : (
             <div className={styles['video-station-stats-empty']}>No video statistics to show.</div>

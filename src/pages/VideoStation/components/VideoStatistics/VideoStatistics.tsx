@@ -5,9 +5,10 @@ import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
 
 interface VideoStatisticsProps {
   ids: string[];
+  onVideoClick?: (id: string) => void;
 }
 
-export function VideoStatistics({ ids }: VideoStatisticsProps) {
+export function VideoStatistics({ ids, onVideoClick }: VideoStatisticsProps) {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
   const { data, loading, error } = useVideoDetails(ids);
@@ -18,6 +19,7 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
 
   // Prepare chart data
   const chartData = data.map((video: VideoStatisticsType) => ({
+    id: video.id,
     name: video.snippet.title,
     channel: video.snippet.channelTitle,
     viewCount: Number(video.statistics.viewCount ?? 0),
@@ -56,11 +58,13 @@ export function VideoStatistics({ ids }: VideoStatisticsProps) {
     );
   };
 
-  // Custom shape for non-clickable bar
   const FullRowBar = (props: any) => {
     const { y, height } = props;
     return (
-      <g>
+      <g
+        onClick={() => onVideoClick?.(props.id ?? chartData[props.index]?.id)}
+        style={{ cursor: onVideoClick ? 'pointer' : 'default' }}
+      >
         <rect
           x={0}
           y={y}
