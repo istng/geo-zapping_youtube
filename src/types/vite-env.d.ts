@@ -1,7 +1,10 @@
 /// <reference types="vite/client" />
 
-declare module '*?inline' {
-  const content: { [key: string]: any };
-  export * from './devAuthService';
-  export default content;
-} 
+interface ImportMetaEnv {
+  readonly VITE_YOUTUBE_API_KEY: string;
+  readonly VITE_VSTATION_VISIBLE_VIDEOS: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
