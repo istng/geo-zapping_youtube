@@ -40,7 +40,6 @@
 .video-station-scroll {
   height: 100vh;
   overflow-y: scroll;
-  scroll-snap-type: y mandatory;
   position: relative;
 }
 
@@ -54,7 +53,6 @@
   top: 0;
   left: 0;
   width: 100%;
-  scroll-snap-align: start;
 }
 
 .video-station-modal-flex {

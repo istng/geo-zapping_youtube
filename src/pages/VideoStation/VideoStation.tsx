@@ -27,10 +27,8 @@ export function VideoStation() {
   const rowVirtualizer = useVirtualizer({
     count: videos.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => window.innerHeight, 
+    estimateSize: () => window.innerHeight,
     overscan: parseInt(import.meta.env.VITE_VSTATION_VISIBLE_VIDEOS || '6', 10),
-    scrollPaddingStart: window.innerHeight * 5, 
-    scrollPaddingEnd: window.innerHeight * 20,
   });
   
   const scrollToIndex = useCallback(
@@ -191,6 +189,7 @@ export function VideoStation() {
                     return (
                       <div
                         key={videoId}
+                        data-index={virtualRow.index}
                         ref={(el) => rowVirtualizer.measureElement?.(el)}
                         className={styles['video-station-virtual-item']}
                         style={{
